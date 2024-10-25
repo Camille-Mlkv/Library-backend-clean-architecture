@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Library.Domain.Entities
 {
-    public class Book
+    public class Book:BaseEntity
     {
-        public int Id { get; set; }
         public string ISBN {  get; set; }
         public string Title { get; set; }
         public string Genre { get; set; }

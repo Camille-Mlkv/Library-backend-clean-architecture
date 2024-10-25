@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace Library.Domain.Entities
 {
-    public class Author
+    public class Author:BaseEntity
     {
-        public int Id { get; set; }
         public string Name { get; set; }
         public string LastName { get; set; }
         public string Country { get; set; }
