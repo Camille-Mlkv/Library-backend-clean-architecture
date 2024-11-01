@@ -1,7 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Library.Domain.Entities;
+using Library.Application.DTOs;
 using Library.Application.AuthorUseCases.Queries;
+using Azure;
+using AutoMapper;
+using Library.Domain.Entities;
 
 namespace Library.AuthorAPI.Controllers
 {
@@ -11,37 +14,57 @@ namespace Library.AuthorAPI.Controllers
     {
         private readonly IMediator _mediator;
 
-        public AuthorController(IMediator mediator)
+        public AuthorController(IMediator mediator) 
         {
             _mediator = mediator;
         }
 
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ResponseData> GetAll()
         {
-            return new string[] { "value1", "value2" };
+            return await _mediator.Send(new GetAllAuthorsRequest());
         }
 
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet]
+        [Route("{id:int}")]
+        public async Task<ResponseData> Get(int id)
         {
-            return "value";
+            var response = await _mediator.Send(new GetAuthorByIdRequest(id));
+            return response;
         }
 
         [HttpPost]
-        public void Post([FromBody] Author newAuthor)
+        public async Task<IActionResult> Post([FromBody] AuthorDTO newAuthor)
         {
-            //newAuthor=_mediator.Send(new AddAuthorRequest(newAuthor));
+            var response=await _mediator.Send(new AddAuthorRequest(newAuthor));
+            var createdAuthor = (AuthorDTO)response.Result;
+            int authorId = createdAuthor.Id;
+
+            return CreatedAtAction(nameof(Post), new { id = authorId }, createdAuthor);
+            
         }
 
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<ResponseData> Put(int id, [FromBody] AuthorDTO author)
         {
+           var response= await _mediator.Send(new UpdateAuthorRequest(id, author));
+           return response;
         }
 
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ResponseData> Delete(int id)
         {
+            var response=await _mediator.Send(new DeleteAuthorRequest(id));
+            return response;
         }
+
+        [HttpGet]
+        [Route("{id:int}/books")]
+        public async Task<ResponseData> GetBooksByAuthorId(int id)
+        {
+            var response = await _mediator.Send(new GetAuthorBooksRequest(id));
+            return response;
+        }
+
     }
 }

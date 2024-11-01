@@ -59,7 +59,7 @@ namespace Library.Domain.Abstractions
         /// <param name="entity">Сущность, которую следует удалить</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task DeleteAsync(T entity, CancellationToken cancellationToken = default);
+        Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Поиск первой сущности, удовлетворяющей условию отбора.
@@ -70,5 +70,11 @@ namespace Library.Domain.Abstractions
         /// <returns></returns>
         Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> filter,
             CancellationToken cancellationToken = default);
+
+        Task<T> GetWithIncludeAsync(
+            Expression<Func<T, bool>> filter,
+            CancellationToken cancellationToken = default,
+            params Expression<Func<T, object>>[] includes);
+        
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Library.Application.DTOs;
-using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Library.Application.AuthorUseCases.Queries
 {
-    public sealed record AddAuthorRequest(AuthorDTO authorDto):IRequest<ResponseData>
+    public sealed record UpdateAuthorRequest(int id, AuthorDTO author):IRequest<ResponseData>
     {
     }
 }

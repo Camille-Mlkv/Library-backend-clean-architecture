@@ -14,14 +14,8 @@ namespace Library.Infrastructure
     {
         public static IServiceCollection AddPersistence(this IServiceCollection services)
         {
-            services.AddSingleton<IUnitOfWork, UnitOfWork>();
-            return services;
-        }
-        public static IServiceCollection AddPersistence(this IServiceCollection services,DbContextOptions options)
-        {
-            services.AddPersistence()
-                .AddSingleton<AppDbContext>(
-                new AppDbContext((DbContextOptions<AppDbContext>)options));
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             return services;
         }
     }

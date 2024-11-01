@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Library.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Library.Infrastructure.Data.Repositories
@@ -19,10 +20,17 @@ namespace Library.Infrastructure.Data.Repositories
             return _context.SaveChangesAsync(cancellationToken);
         }
 
-        public Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
-            _context.Set<T>().Remove(entity);
-            return _context.SaveChangesAsync(cancellationToken);
+            var elem = await GetByIdAsync(id);
+            if(elem != null)
+            {
+                _context.Set<T>().Remove(elem);
+                await _context.SaveChangesAsync(cancellationToken);
+                return true;
+            }
+            return false;
+            
         }
 
         public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default)
@@ -37,6 +45,7 @@ namespace Library.Infrastructure.Data.Repositories
 
         public async Task<T> GetByIdAsync(int id, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includesProperties)
         {
+
             IQueryable<T> query = _entities.AsQueryable();
             if (id >= 0)
             {
@@ -74,12 +83,28 @@ namespace Library.Infrastructure.Data.Repositories
             return await query.ToListAsync(cancellationToken);
         }
 
-        public async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
+        public Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
         {
             _context.Entry(entity).State = EntityState.Modified;
-            await _context.SaveChangesAsync(cancellationToken);
+            return _context.SaveChangesAsync(cancellationToken);
 
         }
+
+        public async Task<T> GetWithIncludeAsync(
+            Expression<Func<T, bool>> filter,
+            CancellationToken cancellationToken = default,
+            params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _entities;
+
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            return await query.FirstOrDefaultAsync(filter, cancellationToken);
+        }
+
     }
 
 }

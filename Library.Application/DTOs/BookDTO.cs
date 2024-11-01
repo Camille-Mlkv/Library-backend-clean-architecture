@@ -3,21 +3,17 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Library.Domain.Entities
+namespace Library.Application.DTOs
 {
-    public class Book:BaseEntity
+    public class BookDTO:BaseEntityDTO
     {
-        public string ISBN {  get; set; }
+        public string ISBN { get; set; }
         public string Title { get; set; }
         public string Genre { get; set; }
         public string Description { get; set; }
-        [ForeignKey("AuthorId")]
         public int AuthorId { get; set; }
-        [JsonIgnore]
-        public virtual Author Author { get; set; }
         public string ClientId { get; set; }
         public DateTime? TakenTime { get; set; }
         public DateTime? ReturnBy { get; set; }
