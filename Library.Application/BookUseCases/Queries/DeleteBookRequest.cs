@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Library.Application.DTOs
+namespace Library.Application.BookUseCases.Queries
 {
-    public class BaseEntityDTO
+    public sealed record DeleteBookRequest(int Id):IRequest<ResponseData>
     {
-        public int? Id { get; set; }
     }
 }

@@ -38,9 +38,9 @@ namespace Library.AuthorAPI.Controllers
         {
             var response=await _mediator.Send(new AddAuthorRequest(newAuthor));
             var createdAuthor = (AuthorDTO)response.Result;
-            int authorId = createdAuthor.Id;
+            //int authorId = createdAuthor.Id;
 
-            return CreatedAtAction(nameof(Post), new { id = authorId }, createdAuthor);
+            return CreatedAtAction(nameof(Post), new { id = createdAuthor.Id }, createdAuthor);
             
         }
 

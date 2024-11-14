@@ -24,10 +24,10 @@ namespace Library.Application.AuthorUseCases.Commands
             var responseData = new ResponseData();
             try
             {
-                var authorWithBooks=await _unitOfWork.AuthorRepository.GetWithIncludeAsync(a => a.Id == request.id, cancellationToken, a => a.Books);
+                var authorWithBooks=await _unitOfWork.AuthorRepository.ListAsync(a => a.Id == request.id, cancellationToken, a => a.Books);
                 if(authorWithBooks != null)
                 {
-                    responseData.Result = authorWithBooks.Books;
+                    responseData.Result = authorWithBooks;
                     responseData.IsSuccess = true;
                     responseData.Message = "Books found for specified author.";
                 }

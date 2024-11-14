@@ -33,7 +33,6 @@ namespace Library.Application.AuthorUseCases.Commands
             }
             catch (Exception ex)
             {
-                responseData.Result = null;
                 responseData.IsSuccess = false;
                 responseData.Message = $"An error occured:{ex.Message}.";
             }

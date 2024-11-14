@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Library.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -9,16 +10,6 @@ namespace Library.Domain.Abstractions
 {
     public interface IRepository<T> where T: class
     {
-        /// <summary>
-        /// Поиск сущности по Id.
-        /// </summary>
-        /// <param name="id">Id сущности</param>
-        /// <param name="cancellationToken"></param>
-        /// <param name="includesProperties">Делегаты для подключения навигационных свойств</param>
-        /// <returns></returns>
-        Task<T> GetByIdAsync(int id, CancellationToken cancellationToken = default,
-            params Expression<Func<T, object>>[]? includesProperties);
-
         /// <summary>
         /// Получение всего списка сущностей.
         /// </summary>
@@ -62,19 +53,24 @@ namespace Library.Domain.Abstractions
         Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Поиск первой сущности, удовлетворяющей условию отбора.
-        /// Если сущность не найдена, будет возвращено значение по умолчанию.
+        /// Поиск сущности по Id.
         /// </summary>
-        /// <param name="filter">Делегат-условие отбора</param>
+        /// <param name="id">Id сущности</param>
         /// <param name="cancellationToken"></param>
+        /// <param name="includesProperties">Делегаты для подключения навигационных свойств</param>
         /// <returns></returns>
-        Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> filter,
-            CancellationToken cancellationToken = default);
+        Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default,
+            params Expression<Func<T, object>>[]? includesProperties);
 
-        Task<T> GetWithIncludeAsync(
-            Expression<Func<T, bool>> filter,
-            CancellationToken cancellationToken = default,
-            params Expression<Func<T, object>>[] includes);
-        
+
+        /// <summary>
+        /// Получение списка сущностей с пагинацией.
+        /// </summary>
+        /// <param name="pageNumber">Номер страницы (начинается с 1)</param>
+        /// <param name="pageSize">Количество элементов на странице</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Отфильтрованный список сущностей с учетом пагинации</returns>
+        Task<ResponseData> GetPagedListAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default, Expression<Func<T, bool>>? filter = null);
+
     }
 }

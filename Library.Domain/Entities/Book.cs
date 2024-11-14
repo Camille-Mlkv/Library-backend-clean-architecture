@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Library.Domain.Entities
 {
@@ -18,8 +13,9 @@ namespace Library.Domain.Entities
         public int AuthorId { get; set; }
         [JsonIgnore]
         public virtual Author Author { get; set; }
-        public string ClientId { get; set; }
+        public string? ClientId { get; set; }
         public DateTime? TakenTime { get; set; }
         public DateTime? ReturnBy { get; set; }
+        public string? ImagePath { get; set; }
     }
 }
