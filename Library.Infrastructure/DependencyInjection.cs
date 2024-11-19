@@ -1,5 +1,8 @@
 ﻿using Library.Infrastructure.Data;
-using Library.Infrastructure.Data.Repositories;
+using Library.Infrastructure.Identity;
+using Library.Infrastructure.Identity.Jwt;
+using Library.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -18,5 +21,20 @@ namespace Library.Infrastructure
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             return services;
         }
+
+        public static IServiceCollection AddIdentity(this IServiceCollection services)
+        {
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+            return services;
+
+        }
+        //Add Identity
+        //UserRepository
+        //JwtTokenGenerator
     }
 }
