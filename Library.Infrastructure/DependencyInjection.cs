@@ -29,7 +29,7 @@ namespace Library.Infrastructure
                 .AddDefaultTokenProviders();
 
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+            services.AddScoped<ITokenGenerator, TokenGenerator>();
             return services;
 
         }

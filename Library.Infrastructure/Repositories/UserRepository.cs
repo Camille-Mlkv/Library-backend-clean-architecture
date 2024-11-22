@@ -2,7 +2,12 @@
 using Library.Infrastructure.Data;
 using Library.Infrastructure.Identity;
 using Library.Infrastructure.Identity.Jwt;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System.Data;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Library.Infrastructure.Repositories
 {
@@ -11,10 +16,10 @@ namespace Library.Infrastructure.Repositories
         private readonly AppDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IJwtTokenGenerator _jwtTokenGenerator;
+        private readonly ITokenGenerator _jwtTokenGenerator;
 
         public UserRepository(AppDbContext context, UserManager<ApplicationUser> userManager, 
-            RoleManager<IdentityRole> roleManager,IJwtTokenGenerator jwtTokenGenerator)
+            RoleManager<IdentityRole> roleManager,ITokenGenerator jwtTokenGenerator)
         {
             _context = context;
             _userManager = userManager;
@@ -41,6 +46,12 @@ namespace Library.Infrastructure.Repositories
             var accessToken = _jwtTokenGenerator.GenerateAccessToken(user,roles);
             var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
 
+            // add refreshToken to database
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiry = DateTime.UtcNow.AddHours(10);
+            await _userManager.UpdateAsync(user);
+
+
             UserDTO userDTO = new()
             {
                 Email = user.Email,
@@ -52,7 +63,8 @@ namespace Library.Infrastructure.Repositories
             LoginResponseDTO loginResponseDTO = new()
             {
                 User = userDTO,
-                AccessToken = accessToken,
+                AccessToken=new JwtSecurityTokenHandler().WriteToken(accessToken),
+                Expiration=accessToken.ValidTo,
                 RefreshToken = refreshToken,
             };
             return loginResponseDTO;
@@ -105,6 +117,60 @@ namespace Library.Infrastructure.Repositories
             }
             return "Error Encountered";
         }
+
+
+        public async Task<LoginResponseDTO> RefreshAccessToken(RefreshModel refreshModel) // when access token is expired it is refreshed with refresh token
+        {
+            var principal = _jwtTokenGenerator.GetPrincipalFromExpiredToken(refreshModel.AccessToken);
+            if (principal?.Identity?.Name is null)
+                return new LoginResponseDTO() { User = null, AccessToken = "" };
+
+            var user = await _userManager.FindByNameAsync(principal.Identity.Name);
+
+            if (user is null || user.RefreshToken != refreshModel.RefreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
+                return new LoginResponseDTO() { User = null, AccessToken = "" };
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
+
+            UserDTO userDTO = new()
+            {
+                Email = user.Email,
+                Id = user.Id,
+                Name = user.Name,
+                PhoneNumber = user.PhoneNumber,
+            };
+
+            LoginResponseDTO loginResponseDTO = new()
+            {
+                User = userDTO,
+                AccessToken = new JwtSecurityTokenHandler().WriteToken(accessToken),
+                Expiration = accessToken.ValidTo,
+                RefreshToken = refreshModel.RefreshToken,
+            };
+            return loginResponseDTO;
+        }
+
+        public async Task<ResponseData> RevokeRefreshToken(string username)
+        {
+            var response=new ResponseData();
+            var user = await _userManager.FindByNameAsync(username);
+            if(user is null)
+            {
+                response.IsSuccess = false;
+                response.Message = "User doesn't exist";
+                return response;
+            }
+
+            user.RefreshToken = null;
+            await _userManager.UpdateAsync(user);
+
+            response.IsSuccess = true;
+            response.Message = "Refresh token revoked";
+            return response;
+        }
+
+
 
     }
     

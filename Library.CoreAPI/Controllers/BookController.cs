@@ -197,8 +197,8 @@ namespace Library.CoreAPI.Controllers
 
             var fileBytes = await System.IO.File.ReadAllBytesAsync(imagePath);
 
-            Response.Headers.Add("Cache-Control", "public, max-age=86400"); // Кэшировать на 1 день
-            Response.Headers.Add("Expires", DateTime.UtcNow.AddDays(1).ToString("R")); // Установка даты истечения кэша
+            Response.Headers["Cache-Control"] = "public, max-age=86400"; // 1 day
+            Response.Headers["Expires"] = DateTime.UtcNow.AddDays(1).ToString("R");
 
             return File(fileBytes, "image/jpeg");
         }

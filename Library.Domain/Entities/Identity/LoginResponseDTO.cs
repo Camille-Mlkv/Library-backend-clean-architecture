@@ -10,6 +10,7 @@ namespace Library.Domain.Entities.Identity
     {
         public UserDTO User { get; set; }
         public string AccessToken { get; set; }
+        public DateTime Expiration { get; set; } //modification
         public string RefreshToken { get; set; }
 
     }

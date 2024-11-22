@@ -3,6 +3,7 @@ using Library.Domain.Entities.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Library.AuthAPI.Controllers
 {
@@ -42,6 +43,29 @@ namespace Library.AuthAPI.Controllers
             {
                 return BadRequest(response);
             }
+        }
+
+        // Refresh access token
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshAccessToken([FromBody] RefreshModel model)
+        {
+            var response = await _mediator.Send(new RefreshAccessTokenRequest(model));
+            if (response.IsSuccess)
+            {
+                return Ok(response);
+            }
+            else
+            {
+                return BadRequest(response);
+            }
+        }
+
+        // Revoke
+        [HttpDelete("revoke")]
+        public async Task<IActionResult> RevokeRefreshToken(string username)
+        {
+            var response=await _mediator.Send(new RevokeRefreshTokenRequest(username));
+            return Ok(response);
         }
     }
 }

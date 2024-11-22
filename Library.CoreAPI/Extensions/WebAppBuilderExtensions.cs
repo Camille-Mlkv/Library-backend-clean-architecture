@@ -30,7 +30,8 @@ namespace Library.CoreAPI.Extensions
                     ValidateIssuer = true,
                     ValidIssuer = issuer,
                     ValidateAudience = true,
-                    ValidAudience = audience,
+                    ValidAudience = audience, // ClockSkew=new TimeSpan(0,0,5)
+                    ClockSkew = TimeSpan.Zero // by default it is set to 5 minutes
                 };
             });
             return builder;
