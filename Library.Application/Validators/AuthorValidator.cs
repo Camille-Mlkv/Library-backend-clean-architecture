@@ -22,7 +22,8 @@ namespace Library.Application.Validators
                 .WithMessage("Author's country can't be empty");
 
             RuleFor(a => a.BirthDay).NotEmpty().
-                LessThan(DateTime.Today);
+                LessThan(DateTime.UtcNow.AddYears(-18))
+                .WithMessage("Birthday must be valid");
         }
 
     }

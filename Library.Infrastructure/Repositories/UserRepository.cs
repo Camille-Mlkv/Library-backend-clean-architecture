@@ -170,6 +170,16 @@ namespace Library.Infrastructure.Repositories
             return response;
         }
 
+        public async Task<bool> UserExists(string userId)
+        {
+            var user=await _userManager.FindByIdAsync(userId);
+            if(user is null)
+            {
+                return false;
+            }
+            return true;
+        }
+
 
 
     }

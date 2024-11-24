@@ -30,6 +30,14 @@ namespace Library.Application.BookUseCases.Commands
                 var found_book = await _unitOfWork.BookRepository.GetByIdAsync(request.BookId);
                 if (found_book != null)
                 {
+                    var clientExists = await _unitOfWork.UserRepository.UserExists(request.ClientId);
+                    if (!clientExists)
+                    {
+                        responseData.IsSuccess = false;
+                        responseData.Message = "Client is invalid.";
+                        return responseData;
+                    }
+
                     found_book.ClientId = request.ClientId;
                     found_book.TakenTime= DateTime.UtcNow;
                     found_book.ReturnBy= DateTime.UtcNow.AddDays(14);

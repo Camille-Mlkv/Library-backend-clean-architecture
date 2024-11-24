@@ -11,7 +11,6 @@ namespace Library.CoreAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class BookController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -20,6 +19,13 @@ namespace Library.CoreAPI.Controllers
         {
             _mediator = mediator;
             _fileService = fileService;
+        }
+
+
+        [HttpGet("throw")]
+        public IActionResult ThrowException()
+        {
+            throw new Exception("Проверка middleware.");
         }
 
         [HttpGet]

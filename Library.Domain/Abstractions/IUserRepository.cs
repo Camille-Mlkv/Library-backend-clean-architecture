@@ -16,5 +16,7 @@ namespace Library.Domain.Abstractions
         Task<LoginResponseDTO> RefreshAccessToken(RefreshModel refreshModel);
 
         Task<ResponseData> RevokeRefreshToken(string username);
+
+        Task<bool> UserExists(string userId);
     }
 }

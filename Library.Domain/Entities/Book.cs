@@ -13,6 +13,7 @@ namespace Library.Domain.Entities
         public int AuthorId { get; set; }
         [JsonIgnore]
         public virtual Author Author { get; set; }
+        [ForeignKey("ClientId")]
         public string? ClientId { get; set; }
         public DateTime? TakenTime { get; set; }
         public DateTime? ReturnBy { get; set; }
