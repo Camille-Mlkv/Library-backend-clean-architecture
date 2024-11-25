@@ -8,7 +8,7 @@ This repository demonstrates a .NET 8 backend application implemented using Clea
    ```
 2. Navigate to project directory:
    ```
-   cd your_directory
+   cd project_directory
    ```
 3. Install dependencies:
    ```
