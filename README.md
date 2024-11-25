@@ -18,5 +18,5 @@ This repository demonstrates a .NET 8 backend application implemented using Clea
    ```
    run_command.bat
    ```
-5. Navigate to `http://localhost:7004/swagger` to run authentication api.
-6. Navigate to `http://localhost:7005/swagger` to run core api.
+5. Navigate to `http://localhost:7005/swagger` to run authentication api.
+6. Navigate to `http://localhost:7004/swagger` to run core api.
