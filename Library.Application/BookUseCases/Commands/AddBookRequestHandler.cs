@@ -1,11 +1,4 @@
-﻿using AutoMapper;
-using Library.Application.BookUseCases.Queries;
-using Library.Application.DTOs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Library.Application.BookUseCases.Queries;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -27,6 +20,7 @@ namespace Library.Application.BookUseCases.Commands
             {
                 var book = _mapper.Map<Book>(request.book);
                 await _unitOfWork.BookRepository.AddAsync(book);
+                await _unitOfWork.SaveAllAsync();
 
                 var createdBook = _mapper.Map<BookDTO>(book);
                 responseData.Result = createdBook;

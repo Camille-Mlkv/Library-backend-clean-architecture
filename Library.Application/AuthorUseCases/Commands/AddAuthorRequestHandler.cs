@@ -1,11 +1,5 @@
-﻿using AutoMapper;
-using Library.Application.AuthorUseCases.Queries;
-using Library.Application.DTOs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Library.Application.AuthorUseCases.Queries;
+
 
 namespace Library.Application.AuthorUseCases.Commands
 {
@@ -25,6 +19,7 @@ namespace Library.Application.AuthorUseCases.Commands
             {
                 var author = _mapper.Map<Author>(request.authorDto);
                 await _unitOfWork.AuthorRepository.AddAsync(author, cancellationToken);
+                await _unitOfWork.SaveAllAsync();
 
                 var authorDto=_mapper.Map<AuthorDTO>(author);
 

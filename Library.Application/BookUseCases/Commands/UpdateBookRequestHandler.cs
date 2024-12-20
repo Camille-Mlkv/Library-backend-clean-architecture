@@ -1,10 +1,4 @@
-﻿using AutoMapper;
-using Library.Application.BookUseCases.Queries;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Library.Application.BookUseCases.Queries;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -26,7 +20,9 @@ namespace Library.Application.BookUseCases.Commands
             {
                 var book = _mapper.Map<Book>(request.NewBook);
                 book.Id = request.Id;
+
                 await _unitOfWork.BookRepository.UpdateAsync(book, cancellationToken);
+                await _unitOfWork.SaveAllAsync();
 
                 responseData.IsSuccess = true;
                 responseData.Message = "Book updated successfully.";

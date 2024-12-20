@@ -1,10 +1,5 @@
-﻿using AutoMapper;
-using Library.Application.AuthorUseCases.Queries;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Library.Application.AuthorUseCases.Queries;
+
 
 namespace Library.Application.AuthorUseCases.Commands
 {
@@ -26,7 +21,7 @@ namespace Library.Application.AuthorUseCases.Commands
                 var author = _mapper.Map<Author>(request.author);
                 author.Id = request.id;
                 await _unitOfWork.AuthorRepository.UpdateAsync(author,cancellationToken);
-
+                await _unitOfWork.SaveAllAsync();
                 //responseData.Result = author;
                 responseData.IsSuccess = true;
                 responseData.Message = "Author updated successfully.";

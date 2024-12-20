@@ -1,11 +1,5 @@
-﻿using AutoMapper;
-using Library.Application.AuthorUseCases.Queries;
-using Library.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Library.Application.AuthorUseCases.Queries;
+
 
 namespace Library.Application.AuthorUseCases.Commands
 {
@@ -32,9 +26,12 @@ namespace Library.Application.AuthorUseCases.Commands
                     response.Message = "Author can't be deleted as it has associated books.";
                     return response;
                 }
-                var is_success=await _unitOfWork.AuthorRepository.DeleteAsync(request.id);
-                if (is_success)
+                var author=await _unitOfWork.AuthorRepository.GetByIdAsync(request.id);
+                if (author!=null)
                 {
+                    await _unitOfWork.AuthorRepository.DeleteAsync(author);
+                    await _unitOfWork.SaveAllAsync();
+
                     response.IsSuccess = true;
                     response.Message = "Author deleted successfully.";
                 }
@@ -43,7 +40,7 @@ namespace Library.Application.AuthorUseCases.Commands
                     response.IsSuccess = false;
                     response.Message = "Author with this id doesn't exist.";
                 }
-                
+
             }
             catch (Exception ex)
             {

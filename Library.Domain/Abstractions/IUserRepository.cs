@@ -1,22 +1,25 @@
 ﻿using Library.Domain.Entities;
-using Library.Domain.Entities.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Library.Domain.Abstractions
 {
     public interface IUserRepository
     {
-        Task<string> Register(RegistrationRequestDTO registrationRequestDTO);
-        Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO);
+        //Task<string> Register(RegistrationRequestDTO registrationRequestDTO);
+        //Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO);
 
-        Task<LoginResponseDTO> RefreshAccessToken(RefreshModel refreshModel);
+        //Task<LoginResponseDTO> RefreshAccessToken(RefreshModel refreshModel);
 
-        Task<ResponseData> RevokeRefreshToken(string username);
+        //Task<ResponseData> RevokeRefreshToken(string username);
 
         Task<bool> UserExists(string userId);
+
+
+        Task<User> GetUserByUsername(string username);
+        Task<bool> CheckPassword(string username, string password);
+        Task<IEnumerable<string>> GetUserRoles(User user);
+        Task UpdateUser(User user);
+        Task CreateRole(string role);
+        Task<User> CreateUser(User user,string password);
+        Task AddRoleToUser(User user,string role);
     }
 }

@@ -1,11 +1,9 @@
 ﻿using Library.Application.AuthenticationUseCases.Queries;
-using Library.Domain.Entities.Identity;
+using Library.Application.DTOs.Identity;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
-namespace Library.AuthAPI.Controllers
+namespace Library.CoreAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -21,7 +19,7 @@ namespace Library.AuthAPI.Controllers
         public async Task<IActionResult> Register([FromBody] RegistrationRequestDTO model)
         {
             var response = await _mediator.Send(new UserRegistrationRequest(model));
-            if(response.IsSuccess)
+            if (response.IsSuccess)
             {
                 return Ok(response);
             }
@@ -47,7 +45,7 @@ namespace Library.AuthAPI.Controllers
 
         // Refresh access token
         [HttpPost("refresh")]
-        public async Task<IActionResult> RefreshAccessToken([FromBody] RefreshModel model)
+        public async Task<IActionResult> RefreshAccessToken([FromBody] RefreshModelDTO model)
         {
             var response = await _mediator.Send(new RefreshAccessTokenRequest(model));
             if (response.IsSuccess)
@@ -64,7 +62,7 @@ namespace Library.AuthAPI.Controllers
         [HttpDelete("revoke")]
         public async Task<IActionResult> RevokeRefreshToken(string username)
         {
-            var response=await _mediator.Send(new RevokeRefreshTokenRequest(username));
+            var response = await _mediator.Send(new RevokeRefreshTokenRequest(username));
             return Ok(response);
         }
     }

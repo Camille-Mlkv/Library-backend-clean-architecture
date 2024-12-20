@@ -1,4 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Library.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,11 +6,11 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Library.Infrastructure.Identity.Jwt
+namespace Library.Domain.Abstractions
 {
     public interface ITokenGenerator
     {
-        SecurityToken GenerateAccessToken(ApplicationUser applicationUser, IEnumerable<string> roles);
+        TokenData GenerateAccessToken(User user, IEnumerable<string> roles);
         string GenerateRefreshToken();
         ClaimsPrincipal? GetPrincipalFromExpiredToken(string accessToken);
     }

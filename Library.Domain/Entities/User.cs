@@ -4,13 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Library.Domain.Entities.Identity
+namespace Library.Domain.Entities
 {
-    public class UserDTO
+    public class User
     {
         public string Id { get; set; }
+        public string UserName { get; set; }
         public string Email { get; set; }
-        public string PhoneNumber { get; set; }
         public string Name { get; set; }
+        public string PhoneNumber { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime RefreshTokenExpiry { get; set; }
     }
 }

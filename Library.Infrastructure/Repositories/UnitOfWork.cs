@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Library.Infrastructure.Data;
+﻿using Library.Infrastructure.Data;
 
 namespace Library.Infrastructure.Repositories
 {
@@ -24,9 +19,6 @@ namespace Library.Infrastructure.Repositories
         public IRepository<Book> BookRepository => _bookRepository.Value;
         public IRepository<Author> AuthorRepository => _authorRepository.Value;
         public IUserRepository UserRepository => _userRepository;
-
-        public async Task CreateDataBaseAsync() => await _context.Database.EnsureCreatedAsync();
-        public async Task DeleteDataBaseAsync() => await _context.Database.EnsureDeletedAsync();
         public async Task SaveAllAsync() => await _context.SaveChangesAsync();
     }
 }

@@ -2,7 +2,6 @@
 using Library.Application.DTOs;
 using Library.Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Library.CoreAPI.Services;
 using Microsoft.AspNetCore.Authorization;

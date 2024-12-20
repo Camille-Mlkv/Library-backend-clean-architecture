@@ -1,14 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Library.Infrastructure.Identity.Jwt
 {
@@ -19,17 +14,17 @@ namespace Library.Infrastructure.Identity.Jwt
         {
             _jwtOptions = jwtOptions.Value;
         }
-        public SecurityToken GenerateAccessToken(ApplicationUser applicationUser, IEnumerable<string> roles)
+        public TokenData GenerateAccessToken(User user, IEnumerable<string> roles)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtOptions.Secret);
 
             var claimList = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Email,applicationUser.Email),
-                new Claim(JwtRegisteredClaimNames.Sub,applicationUser.Id),
-                new Claim(JwtRegisteredClaimNames.Name,applicationUser.UserName),
-                new Claim(ClaimTypes.Name, applicationUser.UserName),
+                new Claim(JwtRegisteredClaimNames.Email,user.Email),
+                new Claim(JwtRegisteredClaimNames.Sub,user.Id),
+                new Claim(JwtRegisteredClaimNames.Name,user.UserName),
+                new Claim(ClaimTypes.Name, user.UserName),
             };
 
             claimList.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
@@ -39,13 +34,19 @@ namespace Library.Infrastructure.Identity.Jwt
                 Audience = _jwtOptions.Audience,
                 Issuer = _jwtOptions.Issuer,
                 Subject = new ClaimsIdentity(claimList),
-                Expires = DateTime.UtcNow.AddHours(3),
+                Expires = DateTime.UtcNow.AddMinutes(1), // 3 hours for access token
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
+
             //return tokenHandler.WriteToken(token);
-            return token;
+            //return token;
+            return new TokenData
+            {
+                AccessToken = tokenHandler.WriteToken(token),
+                Expiration = tokenDescriptor.Expires.Value
+            };
         }
 
         public string GenerateRefreshToken()

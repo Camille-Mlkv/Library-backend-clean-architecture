@@ -50,7 +50,7 @@ namespace Library.Domain.Abstractions
         /// <param name="entity">Сущность, которую следует удалить</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default);
+        Task DeleteAsync(T entity, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Поиск сущности по Id.

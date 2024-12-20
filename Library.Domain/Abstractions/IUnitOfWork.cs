@@ -13,7 +13,5 @@ namespace Library.Domain.Abstractions
         IRepository<Author> AuthorRepository { get; }
         IUserRepository UserRepository { get; }
         public Task SaveAllAsync();
-        public Task DeleteDataBaseAsync();
-        public Task CreateDataBaseAsync();
     }
 }

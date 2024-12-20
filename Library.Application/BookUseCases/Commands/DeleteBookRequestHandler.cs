@@ -1,10 +1,5 @@
-﻿using AutoMapper;
-using Library.Application.BookUseCases.Queries;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Library.Application.BookUseCases.Queries;
+using Library.Domain.Entities;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -24,9 +19,12 @@ namespace Library.Application.BookUseCases.Commands
             var response = new ResponseData();
             try
             {
-                var is_success = await _unitOfWork.BookRepository.DeleteAsync(request.Id);
-                if (is_success)
+                var book=await _unitOfWork.BookRepository.GetByIdAsync(request.Id);
+                if (book != null)
                 {
+                    await _unitOfWork.BookRepository.DeleteAsync(book);
+                    await _unitOfWork.SaveAllAsync();
+
                     response.IsSuccess = true;
                     response.Message = "Book deleted successfully.";
                 }

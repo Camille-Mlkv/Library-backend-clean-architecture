@@ -1,13 +1,4 @@
-﻿using AutoMapper;
-using Library.Application.BookUseCases.Queries;
-using Library.Application.DTOs;
-using Library.Domain.Entities;
-using Microsoft.Extensions.FileProviders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Library.Application.BookUseCases.Queries;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -43,6 +34,8 @@ namespace Library.Application.BookUseCases.Commands
                     found_book.ReturnBy= DateTime.UtcNow.AddDays(14);
 
                     await _unitOfWork.BookRepository.UpdateAsync(found_book, cancellationToken);
+                    await _unitOfWork.SaveAllAsync();
+
                     responseData.IsSuccess = true;
                     responseData.Message = $"Book assigned to client {request.ClientId}.";
                 }

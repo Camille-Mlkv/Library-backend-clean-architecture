@@ -3,12 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Library.Application.Utilities;
 using Library.Infrastructure;
 using Library.CoreAPI.Services;
-using Library.Domain.Abstractions;
-using Library.Infrastructure.Repositories;
 using Library.Infrastructure.Identity.Jwt;
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Library.CoreAPI.Extensions;
 
@@ -18,7 +14,7 @@ builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("ApiSettings:JwtOptions"));
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -49,8 +45,8 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
-builder.Services.AddPersistence();
-builder.Services.ConfigureApplicationServices();
+builder.Services.AddPersistence(); // UoW, Repository
+builder.Services.ConfigureApplicationServices(); // MediatR, AutoMapper,Fluent Validation
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddIdentity(); //UserRepository, JwtTokenGenerator, Identity
 

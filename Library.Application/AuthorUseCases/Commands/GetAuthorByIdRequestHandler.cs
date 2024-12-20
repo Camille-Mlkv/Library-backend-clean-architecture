@@ -1,7 +1,5 @@
-﻿using AutoMapper;
-using Library.Application.AuthorUseCases.Queries;
-using Library.Application.DTOs;
-using Library.Domain.Entities;
+﻿using Library.Application.AuthorUseCases.Queries;
+
 
 namespace Library.Application.AuthorUseCases.Commands
 {

@@ -1,46 +1,54 @@
 ﻿using Library.Application.AuthenticationUseCases.Queries;
-using Library.Domain.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Library.Application.DTOs.Identity;
+using Microsoft.AspNetCore.Identity;
 
 namespace Library.Application.AuthenticationUseCases.Commands
 {
     public class UserLogInRequestHandler : IRequestHandler<UserLogInRequest, ResponseData>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ITokenGenerator _jwtTokenGenerator;
 
-        public UserLogInRequestHandler(IUnitOfWork unitOfWork)
+        public UserLogInRequestHandler(IUnitOfWork unitOfWork, ITokenGenerator jwtTokenGenerator)
         {
             _unitOfWork = unitOfWork;
+            _jwtTokenGenerator = jwtTokenGenerator;
         }
 
         public async Task<ResponseData> Handle(UserLogInRequest request, CancellationToken cancellationToken)
         {
             var response = new ResponseData();
-            try
+
+            var user = await _unitOfWork.UserRepository.GetUserByUsername(request.LoginRequest.UserName);
+
+            if (user == null || !await _unitOfWork.UserRepository.CheckPassword(request.LoginRequest.UserName, request.LoginRequest.Password))
             {
-                var loginResponse = await _unitOfWork.UserRepository.Login(request.LoginRequest);
-                if (loginResponse.User == null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = "Credentials are incorrect.";
-                }
-                else
-                {
-                    response.Result = loginResponse;
-                    response.IsSuccess = true;
-                    response.Message = "Successfully logged in.";
-                }
-                
-            }
-            catch (Exception ex)
-            {
+                response.Message = "Wrong credentials";
                 response.IsSuccess = false;
-                response.Message = $"An error occured while logging in:{ex}";
+                return response;    
             }
+
+            var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
+            var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
+
+            var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiry = DateTime.UtcNow.AddMinutes(5);
+            await _unitOfWork.UserRepository.UpdateUser(user);
+
+
+            LoginResponseDTO loginResponseDTO = new()
+            {
+                User = user, // UserDTO?
+                AccessToken = accessToken.AccessToken,
+                Expiration = accessToken.Expiration,
+                RefreshToken = refreshToken,
+            };
+
+            response.Result = loginResponseDTO;
+            response.IsSuccess = true;
+            response.Message = "Login successful";
+
             return response;
         }
     }

@@ -5,7 +5,6 @@ using Library.Application.DTOs;
 using Library.Domain.Abstractions;
 using Library.Domain.Entities;
 using Moq;
-using System.Linq.Expressions;
 
 namespace Library.UnitTests
 {

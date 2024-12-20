@@ -2,7 +2,6 @@
 using Library.Infrastructure.Data;
 using Library.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Moq;
 
 namespace Library.UnitTests
 {

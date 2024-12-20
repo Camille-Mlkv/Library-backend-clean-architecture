@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
 using Library.Application.DTOs;
-using Library.Domain.Entities;
-using Microsoft.AspNetCore.Http;
 
 
 namespace Library.Application.Utilities

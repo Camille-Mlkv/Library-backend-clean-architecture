@@ -1,10 +1,4 @@
-﻿using FluentValidation.Validators;
-using Library.Application.AuthenticationUseCases.Queries;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Library.Application.AuthenticationUseCases.Queries;
 
 namespace Library.Application.AuthenticationUseCases.Commands
 {
@@ -19,25 +13,30 @@ namespace Library.Application.AuthenticationUseCases.Commands
         public async Task<ResponseData> Handle(UserRegistrationRequest request, CancellationToken cancellationToken)
         {
             var response = new ResponseData();
-            try
+            //mapping?
+            User user = new()
             {
-                string message = await _unitOfWork.UserRepository.Register(request.RegistrationRequest);
-                if (!string.IsNullOrEmpty(message))
-                {
-                    response.IsSuccess = false;
-                    response.Message = message;
-                }
-                else
-                {
-                    response.IsSuccess = true;
-                    response.Message = "User with credentials was registered!";
-                }
+                UserName = request.RegistrationRequest.Email,
+                Email = request.RegistrationRequest.Email,
+                Name = request.RegistrationRequest.Name,
+                PhoneNumber = request.RegistrationRequest.PhoneNumber
+            };
+            await _unitOfWork.UserRepository.CreateRole(request.RegistrationRequest.Role);
+
+            var userCreated=await _unitOfWork.UserRepository.CreateUser(user,request.RegistrationRequest.Password);
+            if (userCreated is not null) // id обязательно
+            {
+                await _unitOfWork.UserRepository.AddRoleToUser(userCreated, request.RegistrationRequest.Role);
+                response.IsSuccess = true;
+                response.Message = "Registrated successfully";
+                response.Result = userCreated;
             }
-            catch (Exception ex)
+            else
             {
                 response.IsSuccess = false;
-                response.Message = $"An error occured while registration:{ex}";
+                response.Message = "An error occured while registrating the user";
             }
+          
             return response;
            
         }

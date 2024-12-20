@@ -3,13 +3,8 @@ using Library.Infrastructure.Identity;
 using Library.Infrastructure.Identity.Jwt;
 using Library.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Library.Infrastructure
 {
@@ -33,8 +28,5 @@ namespace Library.Infrastructure
             return services;
 
         }
-        //Add Identity
-        //UserRepository
-        //JwtTokenGenerator
     }
 }

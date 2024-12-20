@@ -1,11 +1,4 @@
-﻿using Library.Application.DTOs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Library.Application.BookUseCases.Queries
+﻿namespace Library.Application.BookUseCases.Queries
 {
     public sealed record AddBookRequest(BookDTO book):IRequest<ResponseData>
     {
