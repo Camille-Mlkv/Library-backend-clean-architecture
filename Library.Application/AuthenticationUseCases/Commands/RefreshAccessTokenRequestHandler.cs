@@ -54,29 +54,6 @@ namespace Library.Application.AuthenticationUseCases.Commands
                 response.IsSuccess = false;
                 response.Message = $"An error occured while refreshing jwt token in:{ex}";
             }
-
-            //try
-            //{
-            //    var refreshResponse = await _unitOfWork.UserRepository.RefreshAccessToken(request.RefreshModel);
-            //    if(refreshResponse.User is null || refreshResponse.AccessToken == "")
-            //    {
-            //        response.IsSuccess = false;
-            //        response.Message = "Access token not refreshed.";
-            //    }
-            //    else
-            //    {
-            //        response.Result = refreshResponse;
-            //        response.IsSuccess = true;
-            //        response.Message = "Access token refreshed.";
-            //    }
-
-
-            //}
-            //catch (Exception ex)
-            //{
-            //    response.IsSuccess = false;
-            //    response.Message = $"An error occured while refreshing jwt token in:{ex}";
-            //}
             return response;
         }
     }

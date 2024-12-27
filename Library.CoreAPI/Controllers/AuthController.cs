@@ -23,10 +23,12 @@ namespace Library.CoreAPI.Controllers
             {
                 return Ok(response);
             }
-            else
+            if (response.Message.Contains("An error occured while registrating the user"))
             {
-                return BadRequest(response);
+                return BadRequest(response.Message); // 400
             }
+
+            return StatusCode(500, response.Message);
         }
 
         [HttpPost("login")]
@@ -35,12 +37,14 @@ namespace Library.CoreAPI.Controllers
             var response = await _mediator.Send(new UserLogInRequest(model));
             if (response.IsSuccess)
             {
-                return Ok(response);
+                return Ok(response); //200
             }
-            else
+            if (response.Message.Contains("Wrong credentials"))
             {
-                return BadRequest(response);
+                return Unauthorized(response.Message); // 401
             }
+
+            return StatusCode(500, response.Message);
         }
 
         // Refresh access token
@@ -50,12 +54,20 @@ namespace Library.CoreAPI.Controllers
             var response = await _mediator.Send(new RefreshAccessTokenRequest(model));
             if (response.IsSuccess)
             {
-                return Ok(response);
+                return Ok(response.Result);  //200
             }
-            else
+
+            if (response.Message.Contains("Access token not refreshed"))
             {
-                return BadRequest(response);
+                return Unauthorized(response.Message); // 401
             }
+
+            if (response.Message.Contains("validation") || response.Message.Contains("invalid"))
+            {
+                return BadRequest(response.Message); // 400 
+            }
+
+            return StatusCode(500, response.Message); // Internal Server Error
         }
 
         // Revoke
@@ -63,7 +75,17 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> RevokeRefreshToken(string username)
         {
             var response = await _mediator.Send(new RevokeRefreshTokenRequest(username));
-            return Ok(response);
+            if (response.IsSuccess)
+            {
+                return Ok(response);
+            }
+
+            if (response.Message.Contains("User doesn't exist"))
+            {
+                return BadRequest(response.Message); // 400
+            }
+
+            return StatusCode(500, response.Message);
         }
     }
 }

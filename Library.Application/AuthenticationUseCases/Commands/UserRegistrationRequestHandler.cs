@@ -13,30 +13,37 @@ namespace Library.Application.AuthenticationUseCases.Commands
         public async Task<ResponseData> Handle(UserRegistrationRequest request, CancellationToken cancellationToken)
         {
             var response = new ResponseData();
-            //mapping?
-            User user = new()
+            try
             {
-                UserName = request.RegistrationRequest.Email,
-                Email = request.RegistrationRequest.Email,
-                Name = request.RegistrationRequest.Name,
-                PhoneNumber = request.RegistrationRequest.PhoneNumber
-            };
-            await _unitOfWork.UserRepository.CreateRole(request.RegistrationRequest.Role);
+                User user = new()
+                {
+                    UserName = request.RegistrationRequest.Email,
+                    Email = request.RegistrationRequest.Email,
+                    Name = request.RegistrationRequest.Name,
+                    PhoneNumber = request.RegistrationRequest.PhoneNumber
+                };
+                await _unitOfWork.UserRepository.CreateRole(request.RegistrationRequest.Role);
 
-            var userCreated=await _unitOfWork.UserRepository.CreateUser(user,request.RegistrationRequest.Password);
-            if (userCreated is not null) // id обязательно
-            {
+                var userCreated = await _unitOfWork.UserRepository.CreateUser(user, request.RegistrationRequest.Password);
+
+                if (userCreated is null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = "An error occured while registrating the user";
+                    return response;
+                }
+
                 await _unitOfWork.UserRepository.AddRoleToUser(userCreated, request.RegistrationRequest.Role);
                 response.IsSuccess = true;
                 response.Message = "Registrated successfully";
                 response.Result = userCreated;
             }
-            else
+            catch (Exception ex)
             {
                 response.IsSuccess = false;
-                response.Message = "An error occured while registrating the user";
+                response.Message = $"An error occured during registration: {ex.Message}";
             }
-          
+            
             return response;
            
         }

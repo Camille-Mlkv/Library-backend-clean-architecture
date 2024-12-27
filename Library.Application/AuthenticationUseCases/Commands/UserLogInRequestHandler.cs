@@ -19,35 +19,43 @@ namespace Library.Application.AuthenticationUseCases.Commands
         {
             var response = new ResponseData();
 
-            var user = await _unitOfWork.UserRepository.GetUserByUsername(request.LoginRequest.UserName);
-
-            if (user == null || !await _unitOfWork.UserRepository.CheckPassword(request.LoginRequest.UserName, request.LoginRequest.Password))
+            try
             {
-                response.Message = "Wrong credentials";
-                response.IsSuccess = false;
-                return response;    
+                var user = await _unitOfWork.UserRepository.GetUserByUsername(request.LoginRequest.UserName);
+
+                if (user == null || !await _unitOfWork.UserRepository.CheckPassword(request.LoginRequest.UserName, request.LoginRequest.Password))
+                {
+                    response.Message = "Wrong credentials";
+                    response.IsSuccess = false;
+                    return response;
+                }
+
+                var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
+                var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
+
+                var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
+                user.RefreshToken = refreshToken;
+                user.RefreshTokenExpiry = DateTime.UtcNow.AddHours(24);
+                await _unitOfWork.UserRepository.UpdateUser(user);
+
+
+                LoginResponseDTO loginResponseDTO = new()
+                {
+                    User = user, // UserDTO?
+                    AccessToken = accessToken.AccessToken,
+                    Expiration = accessToken.Expiration,
+                    RefreshToken = refreshToken,
+                };
+
+                response.Result = loginResponseDTO;
+                response.IsSuccess = true;
+                response.Message = "Login successful";
             }
-
-            var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
-            var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
-
-            var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiry = DateTime.UtcNow.AddMinutes(5);
-            await _unitOfWork.UserRepository.UpdateUser(user);
-
-
-            LoginResponseDTO loginResponseDTO = new()
+            catch (Exception ex)
             {
-                User = user, // UserDTO?
-                AccessToken = accessToken.AccessToken,
-                Expiration = accessToken.Expiration,
-                RefreshToken = refreshToken,
-            };
-
-            response.Result = loginResponseDTO;
-            response.IsSuccess = true;
-            response.Message = "Login successful";
+                response.IsSuccess = false;
+                response.Message = $"An error occured while logging in: {ex.Message}";
+            }
 
             return response;
         }
