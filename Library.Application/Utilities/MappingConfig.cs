@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Library.Application.DTOs;
+using Library.Application.DTOs.Identity;
 
 
 namespace Library.Application.Utilities

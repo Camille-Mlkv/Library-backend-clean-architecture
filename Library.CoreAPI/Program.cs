@@ -2,7 +2,6 @@ using Library.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Library.Application.Utilities;
 using Library.Infrastructure;
-using Library.CoreAPI.Services;
 using Library.Infrastructure.Identity.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
@@ -45,9 +44,8 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
-builder.Services.AddPersistence(); // UoW, Repository
+builder.Services.AddPersistence(); // UoW, Repository, FileService
 builder.Services.ConfigureApplicationServices(); // MediatR, AutoMapper,Fluent Validation
-builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddIdentity(); //UserRepository, JwtTokenGenerator, Identity
 
 builder.AddAppAuthentication(); // extension method

@@ -16,13 +16,19 @@ namespace Library.Application.BookUseCases.Commands
         public async Task<ResponseData> Handle(GetBooksPerPageRequest request, CancellationToken cancellationToken)
         {
             var responseData = new ResponseData();
+            if(request.PageNo<1 || request.PageSize < 1)
+            {
+                responseData.IsSuccess = false;
+                responseData.Message = "Provide valid data for page number and size";
+                return responseData;
+            }
             try
             {
-                responseData= await _unitOfWork.BookRepository.GetPagedListAsync(request.PageNo, request.PageSize, cancellationToken);
-                var books =((ListModel<Book>)responseData.Result).Items;
-                var booksDtos = _mapper.Map<List<BookDTO>>(books);
+                var bookList=(await _unitOfWork.BookRepository.GetPagedListAsync(request.PageNo, request.PageSize, cancellationToken)).Items;
+                var booksDtos = _mapper.Map<List<BookDTO>>(bookList);
                 responseData.Result = booksDtos;
                 responseData.Message = "Books retrieved successfully.";
+                responseData.IsSuccess=true;
             }
             catch (Exception ex)
             {

@@ -1,6 +1,8 @@
-﻿using Library.Infrastructure.Identity;
+﻿using Library.Infrastructure.Data.Configuration;
+using Library.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace Library.Infrastructure.Data
 {
@@ -17,6 +19,11 @@ namespace Library.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            
+            // fluent api
+            //builder.ApplyConfiguration(new BaseEntityConfiguration());
+            builder.ApplyConfiguration(new AuthorConfiguration());
+            builder.ApplyConfiguration(new BookConfiguration());
         }
 
     }

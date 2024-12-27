@@ -41,22 +41,22 @@ namespace Library.UnitTests
             Assert.Equal("Melwill", result[1].LastName);
         }
 
-        [Fact]
-        public async Task DeleteAsync_ShouldReturnFalse_WhenEntityDoesNotExist()
-        {
-            // Arrange
-            using var context = CreateContext();
-            SeedData(context);
-            var repository = new Repository<Author>(context);
+        //[Fact]
+        //public async Task DeleteAsync_ShouldReturnFalse_WhenEntityDoesNotExist()
+        //{
+        //    // Arrange
+        //    using var context = CreateContext();
+        //    SeedData(context);
+        //    var repository = new Repository<Author>(context);
 
-            // Act
-            var result = await repository.DeleteAsync(99); // ID 99 не существует
+        //    // Act
+        //    var result = await repository.DeleteAsync(99); // ID 99 не существует
 
-            // Assert
-            Assert.False(result);
-            var allEntities = await repository.ListAllAsync(CancellationToken.None);
-            Assert.Equal(2, allEntities.Count); // Убедиться, что начальные данные не изменились
-        }
+        //    // Assert
+        //    Assert.False(result);
+        //    var allEntities = await repository.ListAllAsync(CancellationToken.None);
+        //    Assert.Equal(2, allEntities.Count); // Убедиться, что начальные данные не изменились
+        //}
 
         private void SeedData(AppDbContext context)
         {

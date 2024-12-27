@@ -3,7 +3,6 @@ using Library.Application.DTOs;
 using Library.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Library.CoreAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Library.CoreAPI.Controllers
@@ -13,11 +12,9 @@ namespace Library.CoreAPI.Controllers
     public class BookController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly IFileService _fileService;
-        public BookController(IMediator mediator, IFileService fileService)
+        public BookController(IMediator mediator)
         {
             _mediator = mediator;
-            _fileService = fileService;
         }
 
 
@@ -53,7 +50,6 @@ namespace Library.CoreAPI.Controllers
         [Authorize(Policy = "admin")]
         public async Task<IActionResult> Post([FromForm] BookDTO newBook)
         {
-            newBook.ImagePath = await _fileService.SaveFileAsync(newBook.ImageFile);
             var response = await _mediator.Send(new AddBookRequest(newBook));
             var createdBook = (BookDTO)response.Result;
             if (createdBook != null)
@@ -68,50 +64,15 @@ namespace Library.CoreAPI.Controllers
         [Authorize(Policy = "admin")]
         public async Task<ResponseData> Put(int id, [FromForm] BookDTO updatedBook)
         {
-            var existingBookResponse = await _mediator.Send(new GetBookByIdRequest(id));
-            if (existingBookResponse.Result == null)
-            {
-                return existingBookResponse;
-            }
-            var existingBook = (BookDTO)existingBookResponse.Result;
-
-
-            // Обработка изображения
-            if (updatedBook.ImageFile != null)
-            {
-                if (existingBook.ImagePath != null)
-                {
-                    _fileService.DeleteFileAsync(existingBook.ImagePath);
-                }
-
-                updatedBook.ImagePath = await _fileService.SaveFileAsync(updatedBook.ImageFile);
-            }
-            else
-            {
-                updatedBook.ImagePath = "default-book.png";
-            }
-
             var response = await _mediator.Send(new UpdateBookRequest(id, updatedBook));
             return response;
-
         }
+
 
         [HttpDelete("{id}")]
         [Authorize(Policy = "admin")]
         public async Task<ResponseData> Delete(int id)
         {
-            var existingBookResponse = await _mediator.Send(new GetBookByIdRequest(id));
-            if (existingBookResponse.Result == null)
-            {
-                return existingBookResponse;
-            }
-            var existingBook = (BookDTO)existingBookResponse.Result;
-
-            if (!string.IsNullOrEmpty(existingBook.ImagePath) && existingBook.ImagePath != "default-book.png")
-            {
-                _fileService.DeleteFileAsync(existingBook.ImagePath);
-            }
-
             var response = await _mediator.Send(new DeleteBookRequest(id));
             return response;
         }
@@ -166,24 +127,18 @@ namespace Library.CoreAPI.Controllers
                     IsSuccess = false
                 };
             }
-            return await _mediator.Send(new GetClientBooksRequest(clientId));
+            return await _mediator.Send(new GetClientBooksRequest(clientId,currentUserId));
         }
 
         [HttpPut]
         [Authorize]
         public async Task<ResponseData> AssignBookToClient(int bookId, string clientId)
         {
-            if (bookId <= 0 || string.IsNullOrEmpty(clientId))
-            {
-                return new ResponseData
-                {
-                    IsSuccess = false,
-                    Message = "Invalid book ID or client ID."
-                };
-            }
             return await _mediator.Send(new AssignBookToClientRequest(bookId, clientId));
         }
 
+
+        //this
         [HttpGet("{id}/image")]
         public async Task<IActionResult> GetBookImage(int id)
         {
@@ -192,20 +147,21 @@ namespace Library.CoreAPI.Controllers
             {
                 return BadRequest(existingBookResponse.Message);
             }
-            var existingBook = (BookDTO)existingBookResponse.Result;
-            var imagePath = Path.Combine("wwwroot", "Images", $"{existingBook.ImagePath}");
+            return Ok(existingBookResponse.Result);
+            //var existingBook = (BookDTO)existingBookResponse.Result;
+            //var imagePath = Path.Combine("wwwroot", "Images", $"{existingBook.ImagePath}");
 
-            if (!System.IO.File.Exists(imagePath))
-            {
-                return NotFound("Image not found");
-            }
+            //if (!System.IO.File.Exists(imagePath))
+            //{
+            //    return NotFound("Image not found");
+            //}
 
-            var fileBytes = await System.IO.File.ReadAllBytesAsync(imagePath);
+            //var fileBytes = await System.IO.File.ReadAllBytesAsync(imagePath);
 
-            Response.Headers["Cache-Control"] = "public, max-age=86400"; // 1 day
-            Response.Headers["Expires"] = DateTime.UtcNow.AddDays(1).ToString("R");
+            //Response.Headers["Cache-Control"] = "public, max-age=86400"; // 1 day
+            //Response.Headers["Expires"] = DateTime.UtcNow.AddDays(1).ToString("R");
 
-            return File(fileBytes, "image/jpeg");
+            //return File(fileBytes, "image/jpeg");
         }
     }
 }

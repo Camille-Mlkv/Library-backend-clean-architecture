@@ -34,7 +34,7 @@ namespace Library.Infrastructure.Identity.Jwt
                 Audience = _jwtOptions.Audience,
                 Issuer = _jwtOptions.Issuer,
                 Subject = new ClaimsIdentity(claimList),
-                Expires = DateTime.UtcNow.AddMinutes(1), // 3 hours for access token
+                Expires = DateTime.UtcNow.AddHours(1), // 3 hours for access token
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 

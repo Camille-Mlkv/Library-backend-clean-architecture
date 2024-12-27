@@ -9,11 +9,11 @@ namespace Library.Domain.Entities
         public string Title { get; set; }
         public string Genre { get; set; }
         public string Description { get; set; }
-        [ForeignKey("AuthorId")]
+        //[ForeignKey("AuthorId")]
         public int AuthorId { get; set; }
-        [JsonIgnore]
+        //[JsonIgnore]
         public virtual Author Author { get; set; }
-        [ForeignKey("ClientId")]
+        //[ForeignKey("ClientId")]
         public string? ClientId { get; set; }
         public DateTime? TakenTime { get; set; }
         public DateTime? ReturnBy { get; set; }

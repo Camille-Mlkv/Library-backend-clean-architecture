@@ -70,7 +70,7 @@ namespace Library.Domain.Abstractions
         /// <param name="pageSize">Количество элементов на странице</param>
         /// <param name="cancellationToken"></param>
         /// <returns>Отфильтрованный список сущностей с учетом пагинации</returns>
-        Task<ResponseData> GetPagedListAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default, Expression<Func<T, bool>>? filter = null);
+        Task<ListModel<T>> GetPagedListAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default, Expression<Func<T, bool>>? filter = null);
 
     }
 }

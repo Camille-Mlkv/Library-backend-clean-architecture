@@ -2,6 +2,7 @@
 using Library.Infrastructure.Identity;
 using Library.Infrastructure.Identity.Jwt;
 using Library.Infrastructure.Repositories;
+using Library.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,7 @@ namespace Library.Infrastructure
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddScoped<IFileService, FileService>();
             return services;
         }
 

@@ -17,36 +17,44 @@ namespace Library.Application.AuthenticationUseCases.Commands
         public async Task<ResponseData> Handle(RefreshAccessTokenRequest request, CancellationToken cancellationToken)
         {
             var response = new ResponseData();
-
-            var principal = _jwtTokenGenerator.GetPrincipalFromExpiredToken(request.RefreshModel.AccessToken);
-            if (principal?.Identity?.Name is null)
+            try
             {
-                response.Message = "Access token not refreshed";
+                var principal = _jwtTokenGenerator.GetPrincipalFromExpiredToken(request.RefreshModel.AccessToken);
+                if (principal?.Identity?.Name is null)
+                {
+                    response.Message = "Access token not refreshed";
+                    response.IsSuccess = false;
+                    return response;
+                }
+
+                var user = await _unitOfWork.UserRepository.GetUserByUsername(principal.Identity.Name);
+                if (user is null || user.RefreshToken != request.RefreshModel.RefreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
+                {
+                    response.Message = "Access token not refreshed";
+                    response.IsSuccess = false;
+                    return response;
+                }
+                var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
+                var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
+
+                LoginResponseDTO loginResponseDTO = new()
+                {
+                    User = user,
+                    AccessToken = accessToken.AccessToken,
+                    Expiration = accessToken.Expiration,
+                    RefreshToken = request.RefreshModel.RefreshToken,
+                };
+
+                response.Result = loginResponseDTO;
+                response.IsSuccess = true;
+                response.Message = "Access token refreshed";
+            }
+            catch (Exception ex)
+            {
                 response.IsSuccess = false;
-                return response;
+                response.Message = $"An error occured while refreshing jwt token in:{ex}";
             }
 
-            var user = await _unitOfWork.UserRepository.GetUserByUsername(principal.Identity.Name);
-            if (user is null || user.RefreshToken != request.RefreshModel.RefreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
-            {
-                response.Message = "Access token not refreshed";
-                response.IsSuccess = false;
-                return response;
-            }
-            var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
-            var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
-
-            LoginResponseDTO loginResponseDTO = new()
-            {
-                User=user,
-                AccessToken = accessToken.AccessToken,
-                Expiration = accessToken.Expiration,
-                RefreshToken = request.RefreshModel.RefreshToken,
-            };
-
-            response.Result = loginResponseDTO;
-            response.IsSuccess = true;
-            response.Message = "Access token refreshed";
             //try
             //{
             //    var refreshResponse = await _unitOfWork.UserRepository.RefreshAccessToken(request.RefreshModel);

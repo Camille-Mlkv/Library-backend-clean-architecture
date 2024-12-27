@@ -5,19 +5,19 @@ namespace Library.Infrastructure.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext _context;
-        private readonly Lazy<IRepository<Book>> _bookRepository;
-        private readonly Lazy<IRepository<Author>> _authorRepository;
+        private readonly IRepository<Book> _bookRepository;
+        private readonly IRepository<Author> _authorRepository;
         private readonly IUserRepository _userRepository;
 
-        public UnitOfWork(AppDbContext context,IUserRepository userRepository)
+        public UnitOfWork(AppDbContext context, IRepository<Book> bookRepository, IRepository<Author> authorRepository,IUserRepository userRepository)
         {
             _context = context;
-            _bookRepository = new Lazy<IRepository<Book>>(() => new Repository<Book>(context));
-            _authorRepository = new Lazy<IRepository<Author>>(() => new Repository<Author>(context));
+            _bookRepository = bookRepository;
+            _authorRepository = authorRepository;
             _userRepository = userRepository;
         }
-        public IRepository<Book> BookRepository => _bookRepository.Value;
-        public IRepository<Author> AuthorRepository => _authorRepository.Value;
+        public IRepository<Book> BookRepository => _bookRepository;
+        public IRepository<Author> AuthorRepository => _authorRepository;
         public IUserRepository UserRepository => _userRepository;
         public async Task SaveAllAsync() => await _context.SaveChangesAsync();
     }

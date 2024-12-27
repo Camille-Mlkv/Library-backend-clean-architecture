@@ -18,6 +18,8 @@ namespace Library.Application.BookUseCases.Commands
             var response = new ResponseData();
             try
             {
+                //var user=await _unitOfWork.UserRepository.UserExists(request.CurrentUserId);
+
                 var clientBooks=await _unitOfWork.BookRepository.ListAsync(b=>b.ClientId==request.ClientId, cancellationToken);
                 var booksDtos = _mapper.Map<List<BookDTO>>(clientBooks);
                 response.Result = booksDtos;

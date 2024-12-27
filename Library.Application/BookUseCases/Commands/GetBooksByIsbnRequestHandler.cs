@@ -1,4 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
+using Library.Domain.Entities;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -15,13 +16,19 @@ namespace Library.Application.BookUseCases.Commands
         public async Task<ResponseData> Handle(GetBooksByIsbnRequest request, CancellationToken cancellationToken)
         {
             var response = new ResponseData();
+            if (request.PageNo < 1 || request.PageSize < 1)
+            {
+                response.IsSuccess = false;
+                response.Message = "Provide valid data for page number and size";
+                return response;
+            }
             try
             {
-                response = await _unitOfWork.BookRepository.GetPagedListAsync(request.PageNo, request.PageSize, cancellationToken, b => b.ISBN == request.Isbn);
-                var books = ((ListModel<Book>)response.Result).Items;
-                var booksDtos = _mapper.Map<List<BookDTO>>(books);
+                var bookList = (await _unitOfWork.BookRepository.GetPagedListAsync(request.PageNo, request.PageSize, cancellationToken, b => b.ISBN == request.Isbn)).Items;
+                var booksDtos = _mapper.Map<List<BookDTO>>(bookList);
                 response.Result = booksDtos;
                 response.Message = $"Books with ISBN {request.Isbn} are retrieved successfully.";
+                response.IsSuccess = true;
             }
             catch (Exception ex)
             {

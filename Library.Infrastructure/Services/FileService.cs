@@ -1,4 +1,11 @@
-﻿namespace Library.CoreAPI.Services
+﻿using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Library.Infrastructure.Services
 {
     public class FileService : IFileService
     {
@@ -7,7 +14,6 @@
         {
             _imageFolderPath = configuration["ImageSettings:ImageFolderPath"] ?? "wwwroot/Images";
         }
-
         public void DeleteFileAsync(string fileName)
         {
             if (fileName == "default-book.png")
@@ -22,24 +28,21 @@
             }
         }
 
-        public async Task<string> SaveFileAsync(IFormFile imageFile)
+        public async Task<string> SaveFileAsync(byte[] fileData, string fileName)
         {
-            if (imageFile == null || imageFile.Length == 0)
+            if (fileData == null || fileData.Length == 0)
             {
                 return "default-book.png";
             }
 
-            var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(imageFile.FileName)}";
-            var filePath = Path.Combine(_imageFolderPath, fileName);
+            var newFileName = $"{Guid.NewGuid()}_{Path.GetFileName(fileName)}";
+            var filePath = Path.Combine(_imageFolderPath, newFileName);
 
             Directory.CreateDirectory(_imageFolderPath);
 
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
+            await File.WriteAllBytesAsync(filePath, fileData);
 
-            return fileName;
+            return newFileName;
         }
     }
 }
