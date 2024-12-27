@@ -18,18 +18,16 @@ namespace Library.Application.AuthorUseCases.Commands
             try
             {
                 var authorWithBooks=await _unitOfWork.AuthorRepository.ListAsync(a => a.Id == request.id, cancellationToken, a => a.Books);
-                if(authorWithBooks != null)
-                {
-                    responseData.Result = authorWithBooks;
-                    responseData.IsSuccess = true;
-                    responseData.Message = "Books found for specified author.";
-                }
-                else
+                if(authorWithBooks is null)
                 {
                     responseData.IsSuccess = false;
                     responseData.Message = "Author with this id doesn't exist.";
+                    return responseData;
                 }
-               
+                responseData.Result = authorWithBooks;
+                responseData.IsSuccess = true;
+                responseData.Message = "Books found for specified author.";
+
             }
             catch (Exception ex)
             {

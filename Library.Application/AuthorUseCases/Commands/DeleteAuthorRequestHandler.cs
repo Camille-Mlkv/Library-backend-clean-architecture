@@ -27,19 +27,19 @@ namespace Library.Application.AuthorUseCases.Commands
                     return response;
                 }
                 var author=await _unitOfWork.AuthorRepository.GetByIdAsync(request.id);
-                if (author!=null)
-                {
-                    await _unitOfWork.AuthorRepository.DeleteAsync(author);
-                    await _unitOfWork.SaveAllAsync();
-
-                    response.IsSuccess = true;
-                    response.Message = "Author deleted successfully.";
-                }
-                else
+                if (author is null)
                 {
                     response.IsSuccess = false;
                     response.Message = "Author with this id doesn't exist.";
+                    return response;
                 }
+
+                await _unitOfWork.AuthorRepository.DeleteAsync(author);
+                await _unitOfWork.SaveAllAsync();
+
+                response.IsSuccess = true;
+                response.Message = "Author deleted successfully.";
+
 
             }
             catch (Exception ex)

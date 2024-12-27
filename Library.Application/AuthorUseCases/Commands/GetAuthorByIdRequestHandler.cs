@@ -20,20 +20,19 @@ namespace Library.Application.AuthorUseCases.Commands
             try
             {
                 var found_author=await _unitOfWork.AuthorRepository.GetByIdAsync(request.id);
-                if (found_author != null)
-                {
-                    var author = _mapper.Map<AuthorDTO>(found_author);
-
-                    responseData.Result = author;
-                    responseData.IsSuccess = true;
-                    responseData.Message = "Author found successfully.";
-                }
-                else
+                if (found_author is null)
                 {
                     responseData.IsSuccess = false;
                     responseData.Message = "Author with this id doesn't exist.";
+                    return responseData;
+
                 }
-                
+                var author = _mapper.Map<AuthorDTO>(found_author);
+
+                responseData.Result = author;
+                responseData.IsSuccess = true;
+                responseData.Message = "Author found successfully.";
+
             }
             catch(Exception ex)
             {
