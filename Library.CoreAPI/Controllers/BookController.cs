@@ -25,25 +25,47 @@ namespace Library.CoreAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ResponseData> GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return await _mediator.Send(new GetAllBooksRequest());
+            var response= await _mediator.Send(new GetAllBooksRequest());
+            if (response.IsSuccess)
+            {
+                return Ok(response);
+            }
+            return StatusCode(500, response.Message);
         }
 
         [HttpGet]
         [Route("{id:int}")]
-        public async Task<ResponseData> Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             var response = await _mediator.Send(new GetBookByIdRequest(id));
-            return response;
+            if (response.IsSuccess)
+            {
+                return Ok(response);
+            }
+            if (response.Message.Contains("Book with this id doesn't exist."))
+            {
+                return NotFound(response.Message); // 404
+            }
+            return StatusCode(500, response.Message);
         }
 
         [HttpGet]
         [Route("paged")]
-        public async Task<ResponseData> GetBooksPerPage(int pageNo = 1, int pageSize = 3)
+        public async Task<IActionResult> GetBooksPerPage(int pageNo = 1, int pageSize = 3)
         {
             var response = await _mediator.Send(new GetBooksPerPageRequest(pageNo, pageSize));
-            return response;
+            if (response.IsSuccess)
+            {
+                return Ok(response);
+            }
+
+            if (response.Message.Contains("Provide valid data for page number and size"))
+            {
+                return BadRequest(response.Message);
+            }
+            return StatusCode(500, response.Message);
         }
 
         [HttpPost]
@@ -51,38 +73,60 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> Post([FromForm] BookDTO newBook)
         {
             var response = await _mediator.Send(new AddBookRequest(newBook));
-            var createdBook = (BookDTO)response.Result;
-            if (createdBook != null)
+            if(response.IsSuccess)
             {
-                return CreatedAtAction(nameof(Post), new { id = createdBook.Id }, createdBook);
+                var createdBook = (BookDTO)response.Result;
+                return CreatedAtAction(nameof(Post), new { id = createdBook.Id }, createdBook); // 201
             }
 
-            return BadRequest(response.Message);
+            if (response.Message.Contains("Book with this ISBN already exists.")) 
+            {
+                return Conflict(response.Message); // 409
+            }
+
+            return StatusCode(500, response.Message);
         }
 
         [HttpPut("{id}")]
         [Authorize(Policy = "admin")]
-        public async Task<ResponseData> Put(int id, [FromForm] BookDTO updatedBook)
+        public async Task<IActionResult> Put(int id, [FromForm] BookDTO updatedBook)
         {
             var response = await _mediator.Send(new UpdateBookRequest(id, updatedBook));
-            return response;
+            if (response.IsSuccess)
+            {
+                return StatusCode(204,response.Message);
+            }
+            return StatusCode(500, response.Message);
         }
 
 
         [HttpDelete("{id}")]
         [Authorize(Policy = "admin")]
-        public async Task<ResponseData> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var response = await _mediator.Send(new DeleteBookRequest(id));
-            return response;
+            if (response.IsSuccess)
+            {
+                return StatusCode(204, response.Message);
+            }
+            if (response.Message.Contains("Book with this id doesn't exist."))
+            {
+                return NotFound(response.Message);
+            }
+
+            return StatusCode(500, response.Message);
         }
 
         [HttpGet]
         [Route("available")]
-        public async Task<ResponseData> GetAvailableBooks(int pageNo = 1, int pageSize = 3)
+        public async Task<IActionResult> GetAvailableBooks(int pageNo = 1, int pageSize = 3)
         {
             var response = await _mediator.Send(new GetAvailableBooksRequest(pageNo, pageSize));
-            return response;
+            if (response.IsSuccess)
+            {
+                return Ok(response);
+            }
+            return StatusCode(500, response.Message);
         }
 
 
@@ -113,17 +157,44 @@ namespace Library.CoreAPI.Controllers
         [HttpGet]
         [Route("clientBooks")]
         [Authorize]
-        public async Task<ResponseData> GetClientBooks(string clientId)
+        public async Task<IActionResult> GetClientBooks(string clientId)
         {
             var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            return await _mediator.Send(new GetClientBooksRequest(clientId,currentUserId));
+            var response= await _mediator.Send(new GetClientBooksRequest(clientId,currentUserId));
+            if (response.IsSuccess)
+            {
+                return Ok(response);
+            }
+            if(response.Message.Contains("Client can view only his own books"))
+            {
+                return Unauthorized(response.Message);
+            }
+            return StatusCode(500, response.Message);
+
         }
 
         [HttpPut]
         [Authorize]
-        public async Task<ResponseData> AssignBookToClient(int bookId, string clientId)
+        public async Task<IActionResult> AssignBookToClient(int bookId, string clientId)
         {
-            return await _mediator.Send(new AssignBookToClientRequest(bookId, clientId));
+            var response= await _mediator.Send(new AssignBookToClientRequest(bookId, clientId));
+            if(response.IsSuccess)
+            {
+                return StatusCode(204,response.Message);
+            }
+            if(response.Message.Contains("Book with this id doesn't exist."))
+            {
+                return NotFound(response.Message);
+            }
+            if (response.Message.Contains("Cannot assign the book as it's already assigned."))
+            {
+                return Conflict(response.Message);
+            }
+            if(response.Message.Contains("Client is invalid."))
+            {
+                return NotFound(response.Message);
+            }
+            return StatusCode(500, response.Message);
         }
 
         [HttpGet("{id}/image")]

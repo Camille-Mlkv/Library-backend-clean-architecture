@@ -77,14 +77,13 @@ namespace Library.CoreAPI.Controllers
             var response = await _mediator.Send(new RevokeRefreshTokenRequest(username));
             if (response.IsSuccess)
             {
-                return Ok(response);
+                return StatusCode(204, response.Message);
             }
 
             if (response.Message.Contains("User doesn't exist"))
             {
                 return BadRequest(response.Message); // 400
             }
-
             return StatusCode(500, response.Message);
         }
     }
