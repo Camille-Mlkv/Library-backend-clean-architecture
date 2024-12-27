@@ -18,7 +18,28 @@ namespace Library.Application.BookUseCases.Commands
             var response = new ResponseData();
             try
             {
-                //var user=await _unitOfWork.UserRepository.UserExists(request.CurrentUserId);
+                if(request.CurrentUserId!=request.ClientId)
+                {
+                    response.IsSuccess = false;
+                    response.Message = $"Client can view only his own books";
+                    return response;
+                }
+
+                var user=await _unitOfWork.UserRepository.GetUserById(request.CurrentUserId);
+                if (user is null)
+                {
+                    response.IsSuccess = false;
+                    response.Message = $"Current user not identified";
+                    return response;
+                }
+
+                var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
+                if (!roles.Contains("ADMIN"))
+                {
+                    response.IsSuccess = false;
+                    response.Message = $"You are not allowed to see this client books.";
+                    return response;
+                }
 
                 var clientBooks=await _unitOfWork.BookRepository.ListAsync(b=>b.ClientId==request.ClientId, cancellationToken);
                 var booksDtos = _mapper.Map<List<BookDTO>>(clientBooks);

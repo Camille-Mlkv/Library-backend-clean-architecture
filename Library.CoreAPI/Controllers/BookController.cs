@@ -116,17 +116,6 @@ namespace Library.CoreAPI.Controllers
         public async Task<ResponseData> GetClientBooks(string clientId)
         {
             var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-            var isAdmin = User.IsInRole("ADMIN");
-
-            if (!isAdmin && (currentUserId == null || currentUserId != clientId))
-            {
-                return new ResponseData
-                {
-                    Message = "Access denied. You can only view your own books.",
-                    IsSuccess = false
-                };
-            }
             return await _mediator.Send(new GetClientBooksRequest(clientId,currentUserId));
         }
 
@@ -137,31 +126,15 @@ namespace Library.CoreAPI.Controllers
             return await _mediator.Send(new AssignBookToClientRequest(bookId, clientId));
         }
 
-
-        //this
         [HttpGet("{id}/image")]
         public async Task<IActionResult> GetBookImage(int id)
         {
-            var existingBookResponse = await _mediator.Send(new GetBookByIdRequest(id));
-            if (existingBookResponse.Result == null)
-            {
-                return BadRequest(existingBookResponse.Message);
-            }
-            return Ok(existingBookResponse.Result);
-            //var existingBook = (BookDTO)existingBookResponse.Result;
-            //var imagePath = Path.Combine("wwwroot", "Images", $"{existingBook.ImagePath}");
+            Response.Headers["Cache-Control"] = "public, max-age=86400"; // 1 day
+            Response.Headers["Expires"] = DateTime.UtcNow.AddDays(1).ToString("R");
 
-            //if (!System.IO.File.Exists(imagePath))
-            //{
-            //    return NotFound("Image not found");
-            //}
-
-            //var fileBytes = await System.IO.File.ReadAllBytesAsync(imagePath);
-
-            //Response.Headers["Cache-Control"] = "public, max-age=86400"; // 1 day
-            //Response.Headers["Expires"] = DateTime.UtcNow.AddDays(1).ToString("R");
-
-            //return File(fileBytes, "image/jpeg");
+            var img =await _mediator.Send(new GetBookImageRequest(id));
+            return File(img, "image/jpeg");
+           
         }
     }
 }

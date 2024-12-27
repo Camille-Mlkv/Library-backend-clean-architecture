@@ -11,9 +11,8 @@ namespace Library.Domain.Abstractions
 
         //Task<ResponseData> RevokeRefreshToken(string username);
 
-        Task<bool> UserExists(string userId);
-
-
+        Task<bool> UserExists(string userId); // get rid of it
+        Task<User> GetUserById(string userId);
         Task<User> GetUserByUsername(string username);
         Task<bool> CheckPassword(string username, string password);
         Task<IEnumerable<string>> GetUserRoles(User user);

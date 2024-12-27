@@ -168,6 +168,28 @@ namespace Library.Infrastructure.Repositories
             return true;
         }
 
+        public async Task<User> GetUserById(string userId)
+        {
+            var applicationUser = await _userManager.FindByIdAsync(userId);
+
+            if (applicationUser == null)
+            {
+                return null;
+            }
+
+            //mapping
+            return new User
+            {
+                Id = applicationUser.Id,
+                UserName = applicationUser.UserName,
+                Email = applicationUser.Email,
+                Name = applicationUser.Name,
+                PhoneNumber = applicationUser.PhoneNumber,
+                RefreshToken = applicationUser.RefreshToken,
+                RefreshTokenExpiry = applicationUser.RefreshTokenExpiry,
+            };
+        }
+
         public async Task<User> GetUserByUsername(string username)
         {
             var applicationUser = await _userManager.FindByEmailAsync(username);
