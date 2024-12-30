@@ -2,7 +2,7 @@
 
 namespace Library.Application.BookUseCases.Commands
 {
-    public class AssignBookToClientRequestHandler : IRequestHandler<AssignBookToClientRequest, ResponseData>
+    public class AssignBookToClientRequestHandler : IRequestHandler<AssignBookToClientRequest, ResponseData<object>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -13,9 +13,9 @@ namespace Library.Application.BookUseCases.Commands
             _mapper = mapper;
         }
 
-        public async Task<ResponseData> Handle(AssignBookToClientRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<object>> Handle(AssignBookToClientRequest request, CancellationToken cancellationToken)
         {
-            var responseData = new ResponseData();
+            var responseData = new ResponseData<object>();
             try
             {
                 var found_book = await _unitOfWork.BookRepository.GetByIdAsync(request.BookId);
@@ -23,6 +23,7 @@ namespace Library.Application.BookUseCases.Commands
                 {
                     responseData.IsSuccess = false;
                     responseData.Message = "Book with this id doesn't exist.";
+                    responseData.StatusCode = 404;
                     return responseData;
                 }
 
@@ -30,6 +31,7 @@ namespace Library.Application.BookUseCases.Commands
                 {
                     responseData.IsSuccess = false;
                     responseData.Message = "Cannot assign the book as it's already assigned.";
+                    responseData.StatusCode = 409;
                     return responseData;
                 }
 
@@ -38,6 +40,7 @@ namespace Library.Application.BookUseCases.Commands
                 {
                     responseData.IsSuccess = false;
                     responseData.Message = "Client is invalid.";
+                    responseData.StatusCode = 404;
                     return responseData;
                 }
 
@@ -50,6 +53,7 @@ namespace Library.Application.BookUseCases.Commands
 
                 responseData.IsSuccess = true;
                 responseData.Message = $"Book assigned to client {request.ClientId}.";
+                responseData.StatusCode = 204;
                 
          
             }
@@ -57,6 +61,7 @@ namespace Library.Application.BookUseCases.Commands
             {
                 responseData.IsSuccess = false;
                 responseData.Message = $"Error assigning book: {ex.Message}";
+                responseData.StatusCode = 500;
             }
             return responseData;
         }

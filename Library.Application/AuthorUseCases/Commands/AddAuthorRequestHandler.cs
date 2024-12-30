@@ -3,7 +3,7 @@
 
 namespace Library.Application.AuthorUseCases.Commands
 {
-    public class AddAuthorRequestHandler : IRequestHandler<AddAuthorRequest, ResponseData>
+    public class AddAuthorRequestHandler : IRequestHandler<AddAuthorRequest, ResponseData<AuthorDTO>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -12,9 +12,9 @@ namespace Library.Application.AuthorUseCases.Commands
             _unitOfWork = unitOfWork;
             _mapper=mapper;
         }
-        public async Task<ResponseData> Handle(AddAuthorRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<AuthorDTO>> Handle(AddAuthorRequest request, CancellationToken cancellationToken)
         {
-            var responseData = new ResponseData();
+            var responseData = new ResponseData<AuthorDTO>();
             try
             {
                 var author = _mapper.Map<Author>(request.authorDto);
@@ -26,11 +26,13 @@ namespace Library.Application.AuthorUseCases.Commands
                 responseData.Result = authorDto;
                 responseData.IsSuccess = true;
                 responseData.Message = "Author added successfully.";
+                responseData.StatusCode = 201;
             }
             catch (Exception ex)
             {
                 responseData.IsSuccess = false;
                 responseData.Message = $"Error adding author: {ex.Message}";
+                responseData.StatusCode = 500;
             }
 
             return responseData;

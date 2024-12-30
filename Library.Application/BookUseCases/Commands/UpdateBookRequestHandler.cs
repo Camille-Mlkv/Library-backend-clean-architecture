@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Library.Application.BookUseCases.Commands
 {
-    public class UpdateBookRequestHandler : IRequestHandler<UpdateBookRequest, ResponseData>
+    public class UpdateBookRequestHandler : IRequestHandler<UpdateBookRequest, ResponseData<object>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -16,9 +16,9 @@ namespace Library.Application.BookUseCases.Commands
             _fileService = fileService;
         }
 
-        public async Task<ResponseData> Handle(UpdateBookRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<object>> Handle(UpdateBookRequest request, CancellationToken cancellationToken)
         {
-            var responseData = new ResponseData();
+            var responseData = new ResponseData<object>();
             var updatedBook=request.UpdatedBook;
             try
             {
@@ -28,6 +28,7 @@ namespace Library.Application.BookUseCases.Commands
                 {
                     responseData.IsSuccess = false;
                     responseData.Message = "Book with this id doesn't exist.";
+                    responseData.StatusCode = 404;
                     return responseData;
                 }
 
@@ -38,6 +39,7 @@ namespace Library.Application.BookUseCases.Commands
                     {
                         responseData.IsSuccess = false;
                         responseData.Message = "Book with this ISBN already exists.";
+                        responseData.StatusCode = 409;
                         return responseData;
                     }
                 }
@@ -70,11 +72,13 @@ namespace Library.Application.BookUseCases.Commands
 
                 responseData.IsSuccess = true;
                 responseData.Message = "Book updated successfully.";
+                responseData.StatusCode = 204;
             }
             catch (Exception ex)
             {
                 responseData.IsSuccess = false;
                 responseData.Message = $"Error updating book: {ex.Message}";
+                responseData.StatusCode = 500;
             }
             return responseData;
         }

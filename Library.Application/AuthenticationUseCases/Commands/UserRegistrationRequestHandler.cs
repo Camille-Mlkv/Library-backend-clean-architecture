@@ -2,7 +2,7 @@
 
 namespace Library.Application.AuthenticationUseCases.Commands
 {
-    public class UserRegistrationRequestHandler : IRequestHandler<UserRegistrationRequest, ResponseData>
+    public class UserRegistrationRequestHandler : IRequestHandler<UserRegistrationRequest, ResponseData<User>>
     {
         private readonly IUnitOfWork _unitOfWork;
 
@@ -10,9 +10,9 @@ namespace Library.Application.AuthenticationUseCases.Commands
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task<ResponseData> Handle(UserRegistrationRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<User>> Handle(UserRegistrationRequest request, CancellationToken cancellationToken)
         {
-            var response = new ResponseData();
+            var response = new ResponseData<User>();
             try
             {
                 User user = new()
@@ -30,6 +30,7 @@ namespace Library.Application.AuthenticationUseCases.Commands
                 {
                     response.IsSuccess = false;
                     response.Message = "An error occured while registrating the user";
+                    response.StatusCode = 404;
                     return response;
                 }
 
@@ -37,11 +38,13 @@ namespace Library.Application.AuthenticationUseCases.Commands
                 response.IsSuccess = true;
                 response.Message = "Registrated successfully";
                 response.Result = userCreated;
+                response.StatusCode = 200;
             }
             catch (Exception ex)
             {
                 response.IsSuccess = false;
                 response.Message = $"An error occured during registration: {ex.Message}";
+                response.StatusCode = 500;
             }
             
             return response;

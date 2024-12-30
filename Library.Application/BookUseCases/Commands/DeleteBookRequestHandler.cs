@@ -3,7 +3,7 @@ using Library.Domain.Entities;
 
 namespace Library.Application.BookUseCases.Commands
 {
-    public class DeleteBookRequestHandler : IRequestHandler<DeleteBookRequest, ResponseData>
+    public class DeleteBookRequestHandler : IRequestHandler<DeleteBookRequest, ResponseData<object>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -16,9 +16,9 @@ namespace Library.Application.BookUseCases.Commands
             _fileService = fileService;
         }
 
-        public async Task<ResponseData> Handle(DeleteBookRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<object>> Handle(DeleteBookRequest request, CancellationToken cancellationToken)
         {
-            var response = new ResponseData();
+            var response = new ResponseData<object>();
             try
             {
                 var book =await _unitOfWork.BookRepository.GetByIdAsync(request.Id);
@@ -26,6 +26,7 @@ namespace Library.Application.BookUseCases.Commands
                 {
                     response.IsSuccess = false;
                     response.Message = "Book with this id doesn't exist.";
+                    response.StatusCode = 404;
                     return response;
                 }
 
@@ -39,6 +40,7 @@ namespace Library.Application.BookUseCases.Commands
 
                 response.IsSuccess = true;
                 response.Message = "Book deleted successfully.";
+                response.StatusCode = 204;
 
 
             }
@@ -46,6 +48,7 @@ namespace Library.Application.BookUseCases.Commands
             {
                 response.IsSuccess = false;
                 response.Message = $"An error occured while deleting a book:{ex}";
+                response.StatusCode = 500;
             }
             return response;
         }

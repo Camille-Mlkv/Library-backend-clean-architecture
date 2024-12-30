@@ -2,7 +2,7 @@
 
 namespace Library.Application.AuthorUseCases.Commands
 {
-    public class GetAuthorBooksRequestHandler : IRequestHandler<GetAuthorBooksRequest, ResponseData>
+    public class GetAuthorBooksRequestHandler : IRequestHandler<GetAuthorBooksRequest, ResponseData<Author>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -12,9 +12,9 @@ namespace Library.Application.AuthorUseCases.Commands
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public async Task<ResponseData> Handle(GetAuthorBooksRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<Author>> Handle(GetAuthorBooksRequest request, CancellationToken cancellationToken)
         {
-            var responseData = new ResponseData();
+            var responseData = new ResponseData<Author>();
             try
             {
                 var authorWithBooks=await _unitOfWork.AuthorRepository.ListAsync(a => a.Id == request.id, cancellationToken, a => a.Books);
@@ -22,17 +22,20 @@ namespace Library.Application.AuthorUseCases.Commands
                 {
                     responseData.IsSuccess = false;
                     responseData.Message = "Author with this id doesn't exist.";
+                    responseData.StatusCode = 404;
                     return responseData;
                 }
-                responseData.Result = authorWithBooks;
+                responseData.Result = authorWithBooks.First();
                 responseData.IsSuccess = true;
                 responseData.Message = "Books found for specified author.";
+                responseData.StatusCode = 200;
 
             }
             catch (Exception ex)
             {
                 responseData.IsSuccess = false;
                 responseData.Message = $"An error occured: {ex.Message}";
+                responseData.StatusCode = 500;
             }
             return responseData;
         }

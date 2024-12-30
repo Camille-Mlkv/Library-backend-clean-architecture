@@ -4,7 +4,7 @@ using Library.Application.DTOs.Identity;
 
 namespace Library.Application.AuthenticationUseCases.Commands
 {
-    public class RefreshAccessTokenRequestHandler : IRequestHandler<RefreshAccessTokenRequest, ResponseData>
+    public class RefreshAccessTokenRequestHandler : IRequestHandler<RefreshAccessTokenRequest, ResponseData<LoginResponseDTO>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenGenerator _jwtTokenGenerator;
@@ -14,9 +14,9 @@ namespace Library.Application.AuthenticationUseCases.Commands
             _unitOfWork = unitOfWork;
             _jwtTokenGenerator = tokenGenerator;
         }
-        public async Task<ResponseData> Handle(RefreshAccessTokenRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<LoginResponseDTO>> Handle(RefreshAccessTokenRequest request, CancellationToken cancellationToken)
         {
-            var response = new ResponseData();
+            var response = new ResponseData<LoginResponseDTO>();
             try
             {
                 var principal = _jwtTokenGenerator.GetPrincipalFromExpiredToken(request.RefreshModel.AccessToken);
@@ -24,6 +24,7 @@ namespace Library.Application.AuthenticationUseCases.Commands
                 {
                     response.Message = "Access token not refreshed";
                     response.IsSuccess = false;
+                    response.StatusCode = 401;
                     return response;
                 }
 
@@ -32,6 +33,7 @@ namespace Library.Application.AuthenticationUseCases.Commands
                 {
                     response.Message = "Access token not refreshed";
                     response.IsSuccess = false;
+                    response.StatusCode = 400;
                     return response;
                 }
                 var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
@@ -48,11 +50,13 @@ namespace Library.Application.AuthenticationUseCases.Commands
                 response.Result = loginResponseDTO;
                 response.IsSuccess = true;
                 response.Message = "Access token refreshed";
+                response.StatusCode = 200;
             }
             catch (Exception ex)
             {
                 response.IsSuccess = false;
                 response.Message = $"An error occured while refreshing jwt token in:{ex}";
+                response.StatusCode = 500;
             }
             return response;
         }

@@ -2,7 +2,7 @@
 
 namespace Library.Application.BookUseCases.Commands
 {
-    public class GetAllBooksRequestHandler : IRequestHandler<GetAllBooksRequest, ResponseData>
+    public class GetAllBooksRequestHandler : IRequestHandler<GetAllBooksRequest, ResponseData<List<BookDTO>>>
     {
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
@@ -13,9 +13,9 @@ namespace Library.Application.BookUseCases.Commands
             _mapper = mapper;
         }
 
-        public async Task<ResponseData> Handle(GetAllBooksRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<List<BookDTO>>> Handle(GetAllBooksRequest request, CancellationToken cancellationToken)
         {
-            var responseData = new ResponseData();
+            var responseData = new ResponseData<List<BookDTO>>();
             try
             {
                 var booksList = await _unitOfWork.BookRepository.ListAllAsync(cancellationToken);
@@ -24,11 +24,13 @@ namespace Library.Application.BookUseCases.Commands
                 responseData.Result = booksDtos;
                 responseData.IsSuccess = true;
                 responseData.Message = "All books are retrieved.";
+                responseData.StatusCode = 200;
             }
             catch (Exception ex)
             {
                 responseData.IsSuccess = false;
                 responseData.Message = $"An error occured:{ex.Message}.";
+                responseData.StatusCode = 500;
             }
             return responseData;
         }

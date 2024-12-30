@@ -2,7 +2,7 @@
 
 namespace Library.Application.BookUseCases.Commands
 {
-    public class GetClientBooksRequestHandler : IRequestHandler<GetClientBooksRequest, ResponseData>
+    public class GetClientBooksRequestHandler : IRequestHandler<GetClientBooksRequest, ResponseData<List<BookDTO>>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -13,9 +13,9 @@ namespace Library.Application.BookUseCases.Commands
             _mapper = mapper;
         }
 
-        public async Task<ResponseData> Handle(GetClientBooksRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<List<BookDTO>>> Handle(GetClientBooksRequest request, CancellationToken cancellationToken)
         {
-            var response = new ResponseData();
+            var response = new ResponseData<List<BookDTO>>();
             try
             {
                 var user = await _unitOfWork.UserRepository.GetUserById(request.CurrentUserId);
@@ -23,6 +23,7 @@ namespace Library.Application.BookUseCases.Commands
                 {
                     response.IsSuccess = false;
                     response.Message = $"Current user not identified";
+                    response.StatusCode = 401;
                     return response;
                 }
 
@@ -33,6 +34,7 @@ namespace Library.Application.BookUseCases.Commands
                     {
                         response.IsSuccess = false;
                         response.Message = $"Client can view only his own books";
+                        response.StatusCode = 403;
                         return response;
                     }
                 }
@@ -42,11 +44,13 @@ namespace Library.Application.BookUseCases.Commands
                 response.Result = booksDtos;
                 response.Message = $"Books are retrieved successfully.";
                 response.IsSuccess = true;
+                response.StatusCode = 200;
             }
             catch (Exception ex)
             {
                 response.IsSuccess = false;
                 response.Message = $"An error occured while retrieving books:{ex}";
+                response.StatusCode = 500;
             }
 
             return response;

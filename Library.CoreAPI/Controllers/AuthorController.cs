@@ -22,11 +22,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> GetAll()
         {
             var response= await _mediator.Send(new GetAllAuthorsRequest());
-            if(response.IsSuccess)
-            {
-                return Ok(response);
-            }
-            return StatusCode(500, response.Message);
+            return StatusCode(response.StatusCode,response.Result);
         }
 
         [HttpGet]
@@ -34,15 +30,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> Get(int id)
         {
             var response = await _mediator.Send(new GetAuthorByIdRequest(id));
-            if (response.IsSuccess)
-            {
-                return Ok(response);
-            }
-            if (response.Message.Contains("Author with this id doesn't exist."))
-            {
-                return NotFound(response.Message); // 404
-            }
-            return StatusCode(500, response.Message);
+            return StatusCode(response.StatusCode, response.Message);
         }
 
         [HttpPost]
@@ -52,11 +40,9 @@ namespace Library.CoreAPI.Controllers
             var response = await _mediator.Send(new AddAuthorRequest(newAuthor));
             if (response.IsSuccess)
             {
-                var createdAuthor = (AuthorDTO)response.Result;
-
-                return CreatedAtAction(nameof(Post), new { id = createdAuthor.Id }, createdAuthor); // 201
+                return CreatedAtAction(nameof(Post), new { id = response.Result.Id }, response.Result); // 201
             }
-            return StatusCode(500, response.Message);
+            return StatusCode(response.StatusCode, response.Message);
 
         }
 
@@ -65,11 +51,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> Put(int id, [FromBody] AuthorDTO author)
         {
             var response = await _mediator.Send(new UpdateAuthorRequest(id, author));
-            if(response.IsSuccess)
-            {
-                return StatusCode(204,response.Message);
-            }
-            return StatusCode(500, response.Message);
+            return StatusCode(response.StatusCode, response.Message);
         }
 
         [HttpDelete("{id}")]
@@ -77,15 +59,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _mediator.Send(new DeleteAuthorRequest(id));
-            if (response.IsSuccess)
-            {
-                return StatusCode(204, response.Message); // 204
-            }
-            if (response.Message.Contains("Author with this id doesn't exist."))
-            {
-                return NotFound(response.Message); // 404
-            }
-            return StatusCode(500, response.Message);
+            return StatusCode(response.StatusCode, response.Message);
         }
 
         [HttpGet]
@@ -93,15 +67,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> GetBooksByAuthorId(int id)
         {
             var response = await _mediator.Send(new GetAuthorBooksRequest(id));
-            if (response.IsSuccess)
-            {
-                return Ok(response);
-            }
-            if (response.Message.Contains("Author with this id doesn't exist."))
-            {
-                return NotFound(response.Message); // 404
-            }
-            return StatusCode(500, response.Message);
+            return StatusCode(response.StatusCode, response);
         }
     }
 }

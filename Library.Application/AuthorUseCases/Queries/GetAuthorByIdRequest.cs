@@ -1,6 +1,6 @@
 ﻿namespace Library.Application.AuthorUseCases.Queries
 {
-    public sealed record GetAuthorByIdRequest(int  id):IRequest<ResponseData>
+    public sealed record GetAuthorByIdRequest(int  id):IRequest<ResponseData<AuthorDTO>>
     {
     }
 }

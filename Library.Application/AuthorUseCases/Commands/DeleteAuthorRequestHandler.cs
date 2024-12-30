@@ -3,7 +3,7 @@
 
 namespace Library.Application.AuthorUseCases.Commands
 {
-    public class DeleteAuthorRequestHandler : IRequestHandler<DeleteAuthorRequest, ResponseData>
+    public class DeleteAuthorRequestHandler : IRequestHandler<DeleteAuthorRequest, ResponseData<object>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -14,9 +14,9 @@ namespace Library.Application.AuthorUseCases.Commands
             _mapper = mapper;
         }
 
-        public async Task<ResponseData> Handle(DeleteAuthorRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<object>> Handle(DeleteAuthorRequest request, CancellationToken cancellationToken)
         {
-            var response=new ResponseData();
+            var response=new ResponseData<object>();
             try
             {
                 var books = await _unitOfWork.BookRepository.ListAsync(b => b.AuthorId == request.id);
@@ -24,6 +24,7 @@ namespace Library.Application.AuthorUseCases.Commands
                 {
                     response.IsSuccess = false;
                     response.Message = "Author can't be deleted as it has associated books.";
+                    response.StatusCode = 409;
                     return response;
                 }
                 var author=await _unitOfWork.AuthorRepository.GetByIdAsync(request.id);
@@ -31,6 +32,7 @@ namespace Library.Application.AuthorUseCases.Commands
                 {
                     response.IsSuccess = false;
                     response.Message = "Author with this id doesn't exist.";
+                    response.StatusCode = 404;
                     return response;
                 }
 
@@ -39,6 +41,7 @@ namespace Library.Application.AuthorUseCases.Commands
 
                 response.IsSuccess = true;
                 response.Message = "Author deleted successfully.";
+                response.StatusCode = 204;
 
 
             }
@@ -46,6 +49,7 @@ namespace Library.Application.AuthorUseCases.Commands
             {
                 response.IsSuccess = false;
                 response.Message = $"An error occured while deleting an author:{ex}";
+                response.StatusCode = 500;
             }
             return response;
         }

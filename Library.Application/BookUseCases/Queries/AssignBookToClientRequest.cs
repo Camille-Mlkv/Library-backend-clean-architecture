@@ -1,6 +1,6 @@
 ﻿namespace Library.Application.BookUseCases.Queries
 {
-    public sealed record AssignBookToClientRequest(int BookId, string ClientId):IRequest<ResponseData>
+    public sealed record AssignBookToClientRequest(int BookId, string ClientId):IRequest<ResponseData<object>>
     {
     }
 }

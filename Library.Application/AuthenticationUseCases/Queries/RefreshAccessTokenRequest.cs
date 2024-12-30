@@ -2,7 +2,7 @@
 
 namespace Library.Application.AuthenticationUseCases.Queries
 {
-    public sealed record RefreshAccessTokenRequest(RefreshModelDTO RefreshModel):IRequest<ResponseData>
+    public sealed record RefreshAccessTokenRequest(RefreshModelDTO RefreshModel):IRequest<ResponseData<LoginResponseDTO>>
     {
     }
 }

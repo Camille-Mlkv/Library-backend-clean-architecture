@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Library.Application.AuthenticationUseCases.Commands
 {
-    public class UserLogInRequestHandler : IRequestHandler<UserLogInRequest, ResponseData>
+    public class UserLogInRequestHandler : IRequestHandler<UserLogInRequest, ResponseData<LoginResponseDTO>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenGenerator _jwtTokenGenerator;
@@ -15,9 +15,9 @@ namespace Library.Application.AuthenticationUseCases.Commands
             _jwtTokenGenerator = jwtTokenGenerator;
         }
 
-        public async Task<ResponseData> Handle(UserLogInRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<LoginResponseDTO>> Handle(UserLogInRequest request, CancellationToken cancellationToken)
         {
-            var response = new ResponseData();
+            var response = new ResponseData<LoginResponseDTO>();
 
             try
             {
@@ -27,6 +27,7 @@ namespace Library.Application.AuthenticationUseCases.Commands
                 {
                     response.Message = "Wrong credentials";
                     response.IsSuccess = false;
+                    response.StatusCode = 401;
                     return response;
                 }
 
@@ -41,7 +42,7 @@ namespace Library.Application.AuthenticationUseCases.Commands
 
                 LoginResponseDTO loginResponseDTO = new()
                 {
-                    User = user, // UserDTO?
+                    User = user,
                     AccessToken = accessToken.AccessToken,
                     Expiration = accessToken.Expiration,
                     RefreshToken = refreshToken,
@@ -50,11 +51,13 @@ namespace Library.Application.AuthenticationUseCases.Commands
                 response.Result = loginResponseDTO;
                 response.IsSuccess = true;
                 response.Message = "Login successful";
+                response.StatusCode = 200;
             }
             catch (Exception ex)
             {
                 response.IsSuccess = false;
                 response.Message = $"An error occured while logging in: {ex.Message}";
+                response.StatusCode = 500;
             }
 
             return response;

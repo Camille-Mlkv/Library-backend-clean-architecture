@@ -3,7 +3,7 @@
 
 namespace Library.Application.AuthorUseCases.Commands
 {
-    public class GetAuthorByIdRequestHandler:IRequestHandler<GetAuthorByIdRequest,ResponseData>
+    public class GetAuthorByIdRequestHandler:IRequestHandler<GetAuthorByIdRequest,ResponseData<AuthorDTO>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -14,9 +14,9 @@ namespace Library.Application.AuthorUseCases.Commands
             _mapper = mapper;
         }
 
-        public async Task<ResponseData> Handle(GetAuthorByIdRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<AuthorDTO>> Handle(GetAuthorByIdRequest request, CancellationToken cancellationToken)
         {
-            var responseData=new ResponseData();
+            var responseData=new ResponseData<AuthorDTO>();
             try
             {
                 var found_author=await _unitOfWork.AuthorRepository.GetByIdAsync(request.id);
@@ -24,6 +24,7 @@ namespace Library.Application.AuthorUseCases.Commands
                 {
                     responseData.IsSuccess = false;
                     responseData.Message = "Author with this id doesn't exist.";
+                    responseData.StatusCode = 404;
                     return responseData;
 
                 }
@@ -32,12 +33,14 @@ namespace Library.Application.AuthorUseCases.Commands
                 responseData.Result = author;
                 responseData.IsSuccess = true;
                 responseData.Message = "Author found successfully.";
+                responseData.StatusCode = 200;
 
             }
             catch(Exception ex)
             {
                 responseData.IsSuccess = false;
                 responseData.Message = $"Error finding author: {ex.Message}";
+                responseData.StatusCode = 500;
             }
             return responseData;
         }

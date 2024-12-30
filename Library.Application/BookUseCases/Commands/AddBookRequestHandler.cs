@@ -2,7 +2,7 @@
 
 namespace Library.Application.BookUseCases.Commands
 {
-    public class AddBookRequestHandler : IRequestHandler<AddBookRequest, ResponseData>
+    public class AddBookRequestHandler : IRequestHandler<AddBookRequest, ResponseData<BookDTO>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -15,9 +15,9 @@ namespace Library.Application.BookUseCases.Commands
             _fileService = fileService;
         }
 
-        public async Task<ResponseData> Handle(AddBookRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<BookDTO>> Handle(AddBookRequest request, CancellationToken cancellationToken)
         {
-            var responseData = new ResponseData();
+            var responseData = new ResponseData<BookDTO>();
 
             var formFile=request.book.ImageFile;
             var bytes = new byte[0];
@@ -44,6 +44,7 @@ namespace Library.Application.BookUseCases.Commands
                 {
                     responseData.IsSuccess = false;
                     responseData.Message = "Book with this ISBN already exists.";
+                    responseData.StatusCode = 409;
                     return responseData;
                 }
 
@@ -54,11 +55,13 @@ namespace Library.Application.BookUseCases.Commands
                 responseData.Result = createdBook;
                 responseData.IsSuccess = true;
                 responseData.Message = "Book added successfully.";
+                responseData.StatusCode = 201;
             }
             catch (Exception ex)
             {
                 responseData.IsSuccess = false;
                 responseData.Message = $"Error adding book: {ex.Message}";
+                responseData.StatusCode = 500;
             }
 
             return responseData;

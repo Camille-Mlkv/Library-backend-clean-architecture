@@ -2,7 +2,7 @@
 
 namespace Library.Application.AuthenticationUseCases.Queries
 {
-    public sealed record UserLogInRequest(LoginRequestDTO LoginRequest):IRequest<ResponseData>
+    public sealed record UserLogInRequest(LoginRequestDTO LoginRequest):IRequest<ResponseData<LoginResponseDTO>>
     {
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Library.Application.AuthorUseCases.Commands
 {
-    public class GetAllAuthorsRequestHandler : IRequestHandler<GetAllAuthorsRequest, ResponseData>
+    public class GetAllAuthorsRequestHandler : IRequestHandler<GetAllAuthorsRequest, ResponseData<List<AuthorDTO>>>
     {
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
@@ -12,9 +12,9 @@ namespace Library.Application.AuthorUseCases.Commands
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public async Task<ResponseData> Handle(GetAllAuthorsRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<List<AuthorDTO>>> Handle(GetAllAuthorsRequest request, CancellationToken cancellationToken)
         {
-            var responseData=new ResponseData();
+            var responseData=new ResponseData<List<AuthorDTO>>();
             try
             {
                 var authorsList = await _unitOfWork.AuthorRepository.ListAllAsync(cancellationToken);
@@ -22,12 +22,14 @@ namespace Library.Application.AuthorUseCases.Commands
 
                 responseData.Result= authorDtos;
                 responseData.IsSuccess = true;
+                responseData.StatusCode = 200;
                 responseData.Message = "All authors are retrieved.";
             }
             catch (Exception ex)
             {
                 responseData.IsSuccess = false;
                 responseData.Message = $"An error occured:{ex.Message}.";
+                responseData.StatusCode = 500;
             }
             return responseData;
         }
