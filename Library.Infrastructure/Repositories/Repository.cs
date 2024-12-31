@@ -64,10 +64,9 @@ namespace Library.Infrastructure.Repositories
 
             IQueryable<T> query = _entities.AsQueryable();
             query = query.AsNoTracking();
-            if (id >= 0)
-            {
-                query = query.Where(entity => entity.Id == id);
-            }
+
+            query = query.Where(entity => entity.Id == id);
+            
             if (includesProperties != null && includesProperties.Any())
             {
                 foreach (var property in includesProperties)
@@ -79,56 +78,8 @@ namespace Library.Infrastructure.Repositories
             return await query.FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<ListModel<T>> GetPagedListAsync(int pageNumber = 1, int pageSize = 3, CancellationToken cancellationToken = default, Expression<Func<T, bool>>? filter = null)
+        public async Task<List<T>> GetPagedListAsync(int pageNumber = 1, int pageSize = 3, CancellationToken cancellationToken = default, Expression<Func<T, bool>>? filter = null)
         {
-
-            //var query = _context.Set<T>().AsQueryable();
-            //var dataList = new ListModel<T>();
-            //var responseData = new ResponseData();
-
-            //if (filter != null)
-            //{
-            //    query = query.Where(filter);
-            //}
-
-            //// количество элементов в списке
-            //var count = await query.CountAsync();
-            //if (count == 0)
-            //{
-            //    dataList.Items = new List<T>();
-            //    dataList.CurrentPage = 0;
-            //    dataList.TotalPages = 0;
-
-            //    responseData.Message = "No items in collection,";
-            //    responseData.IsSuccess = true;
-            //    responseData.Result = dataList;
-
-            //    return responseData;
-            //}
-            //// количество страниц
-            //int totalPages = (int)Math.Ceiling(count / (double)pageSize);
-            //if (pageNumber > totalPages || pageNumber < 1)
-            //{
-            //    // Return an empty list if the page number is invalid
-            //    dataList.Items = new List<T>();
-            //    dataList.CurrentPage = pageNumber;
-            //    dataList.TotalPages = totalPages;
-
-            //    responseData.Message = "Page number is not valid";
-            //    responseData.IsSuccess = false;
-            //    responseData.Result = dataList;
-
-            //    return responseData;
-
-            //}
-
-            //dataList.Items = await query.OrderBy(d => d.Id).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-
-            //dataList.CurrentPage = pageNumber;
-            //dataList.TotalPages = totalPages;
-            //responseData.Result = dataList;
-
-            //return responseData;
             var query = _context.Set<T>().AsQueryable();
 
             if (filter != null)
@@ -142,15 +93,7 @@ namespace Library.Infrastructure.Repositories
                 .Take(pageSize)
                 .ToListAsync(cancellationToken);
 
-            var totalItems = await query.CountAsync(cancellationToken);
-            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-
-            return new ListModel<T>
-            {
-                Items = items,
-                CurrentPage = pageNumber,
-                TotalPages = totalPages
-            };
+            return items;
         }
 
     }

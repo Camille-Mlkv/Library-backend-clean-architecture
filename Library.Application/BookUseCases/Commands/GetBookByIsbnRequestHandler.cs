@@ -1,21 +1,20 @@
 ﻿using Library.Application.BookUseCases.Queries;
-using Library.Domain.Entities;
 
 namespace Library.Application.BookUseCases.Commands
 {
-    public class GetBooksByIsbnRequestHandler : IRequestHandler<GetBooksByIsbnRequest, ResponseData<List<BookDTO>>>
+    public class GetBookByIsbnRequestHandler : IRequestHandler<GetBookByIsbnRequest, ResponseData<BookDTO>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public GetBooksByIsbnRequestHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetBookByIsbnRequestHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public async Task<ResponseData<List<BookDTO>>> Handle(GetBooksByIsbnRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<BookDTO>> Handle(GetBookByIsbnRequest request, CancellationToken cancellationToken)
         {
-            var response = new ResponseData<List<BookDTO>>();
+            var response = new ResponseData<BookDTO>();
             if (request.PageNo < 1 || request.PageSize < 1)
             {
                 response.IsSuccess = false;
@@ -25,10 +24,10 @@ namespace Library.Application.BookUseCases.Commands
             }
             try
             {
-                var bookList = (await _unitOfWork.BookRepository.GetPagedListAsync(request.PageNo, request.PageSize, cancellationToken, b => b.ISBN == request.Isbn)).Items;
-                var booksDtos = _mapper.Map<List<BookDTO>>(bookList);
-                response.Result = booksDtos;
-                response.Message = $"Books with ISBN {request.Isbn} are retrieved successfully.";
+                var book =(await _unitOfWork.BookRepository.GetPagedListAsync(request.PageNo, request.PageSize, cancellationToken, b => b.ISBN == request.Isbn)).First();
+                var bookDto = _mapper.Map<BookDTO>(book);
+                response.Result = bookDto;
+                response.Message = $"Book with ISBN {request.Isbn} retrieved successfully.";
                 response.IsSuccess = true;
                 response.StatusCode = 200;
             }

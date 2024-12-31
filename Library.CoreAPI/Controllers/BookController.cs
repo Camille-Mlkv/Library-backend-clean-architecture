@@ -1,6 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
 using Library.Application.DTOs;
-using Library.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -28,7 +27,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> GetAll()
         {
             var response= await _mediator.Send(new GetAllBooksRequest());
-            return StatusCode(response.StatusCode, response.Message);
+            return StatusCode(response.StatusCode, response);
         }
 
         [HttpGet]
@@ -97,7 +96,7 @@ namespace Library.CoreAPI.Controllers
             }
             else if (!string.IsNullOrEmpty(isbn))
             {
-                var response = await _mediator.Send(new GetBooksByIsbnRequest(isbn, pageNo, pageSize));
+                var response = await _mediator.Send(new GetBookByIsbnRequest(isbn, pageNo, pageSize));
                 return StatusCode(response.StatusCode, response);
             }
             else if (authorId.HasValue)

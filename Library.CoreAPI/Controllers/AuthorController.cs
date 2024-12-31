@@ -1,6 +1,5 @@
 ﻿using Library.Application.AuthorUseCases.Queries;
 using Library.Application.DTOs;
-using Library.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

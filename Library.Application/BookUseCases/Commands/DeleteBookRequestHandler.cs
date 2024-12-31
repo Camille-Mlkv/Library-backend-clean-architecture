@@ -1,5 +1,4 @@
 ﻿using Library.Application.BookUseCases.Queries;
-using Library.Domain.Entities;
 
 namespace Library.Application.BookUseCases.Commands
 {

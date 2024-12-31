@@ -1,5 +1,4 @@
 ﻿using Library.Application.BookUseCases.Queries;
-using Microsoft.AspNetCore.Http;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -22,7 +21,6 @@ namespace Library.Application.BookUseCases.Commands
             var updatedBook=request.UpdatedBook;
             try
             {
-                // check if book with this id exists
                 var existingBook = await _unitOfWork.BookRepository.GetByIdAsync(request.Id);
                 if(existingBook is null)
                 {
@@ -45,7 +43,6 @@ namespace Library.Application.BookUseCases.Commands
                 }
 
                 // image
-
                 if (updatedBook.ImageFile != null)
                 {
                     if (existingBook.ImagePath != null)

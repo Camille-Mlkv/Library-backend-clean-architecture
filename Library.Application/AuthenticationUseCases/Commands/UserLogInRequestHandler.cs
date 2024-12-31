@@ -1,6 +1,5 @@
 ﻿using Library.Application.AuthenticationUseCases.Queries;
 using Library.Application.DTOs.Identity;
-using Microsoft.AspNetCore.Identity;
 
 namespace Library.Application.AuthenticationUseCases.Commands
 {
@@ -23,7 +22,7 @@ namespace Library.Application.AuthenticationUseCases.Commands
             {
                 var user = await _unitOfWork.UserRepository.GetUserByUsername(request.LoginRequest.UserName);
 
-                if (user == null || !await _unitOfWork.UserRepository.CheckPassword(request.LoginRequest.UserName, request.LoginRequest.Password))
+                if (user == null || !await _unitOfWork.UserRepository.CheckPassword(user, request.LoginRequest.Password))
                 {
                     response.Message = "Wrong credentials";
                     response.IsSuccess = false;
@@ -32,19 +31,21 @@ namespace Library.Application.AuthenticationUseCases.Commands
                 }
 
                 var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
-                var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
+                var (accessToken, expiry) = _jwtTokenGenerator.GenerateAccessToken(user, roles);
 
                 var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
                 user.RefreshToken = refreshToken;
                 user.RefreshTokenExpiry = DateTime.UtcNow.AddHours(24);
+
                 await _unitOfWork.UserRepository.UpdateUser(user);
+                await _unitOfWork.SaveAllAsync();
 
 
                 LoginResponseDTO loginResponseDTO = new()
                 {
                     User = user,
-                    AccessToken = accessToken.AccessToken,
-                    Expiration = accessToken.Expiration,
+                    AccessToken = accessToken,
+                    Expiration = expiry,
                     RefreshToken = refreshToken,
                 };
 

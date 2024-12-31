@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using Library.Application.DTOs;
 
 namespace Library.Application.Validators
 {

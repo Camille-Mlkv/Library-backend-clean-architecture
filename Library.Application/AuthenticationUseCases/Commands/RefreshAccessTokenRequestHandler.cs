@@ -43,7 +43,7 @@ namespace Library.Application.AuthenticationUseCases.Commands
                 {
                     User = user,
                     AccessToken = accessToken.AccessToken,
-                    Expiration = accessToken.Expiration,
+                    Expiration = accessToken.Expiry,
                     RefreshToken = request.RefreshModel.RefreshToken,
                 };
 

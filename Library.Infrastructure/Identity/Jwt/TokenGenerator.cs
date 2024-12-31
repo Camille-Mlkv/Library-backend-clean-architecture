@@ -14,7 +14,7 @@ namespace Library.Infrastructure.Identity.Jwt
         {
             _jwtOptions = jwtOptions.Value;
         }
-        public TokenData GenerateAccessToken(User user, IEnumerable<string> roles)
+        public (string AccessToken, DateTime Expiry) GenerateAccessToken(User user, IEnumerable<string> roles)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtOptions.Secret);
@@ -40,13 +40,7 @@ namespace Library.Infrastructure.Identity.Jwt
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            //return tokenHandler.WriteToken(token);
-            //return token;
-            return new TokenData
-            {
-                AccessToken = tokenHandler.WriteToken(token),
-                Expiration = tokenDescriptor.Expires.Value
-            };
+            return (tokenHandler.WriteToken(token), tokenDescriptor.Expires.Value);
         }
 
         public string GenerateRefreshToken()

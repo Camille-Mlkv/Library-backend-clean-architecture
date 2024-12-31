@@ -1,4 +1,4 @@
-﻿namespace Library.Domain.Entities
+﻿namespace Library.Application.DTOs
 {
     public class ResponseData<T>
     {

@@ -2,7 +2,6 @@
 using Library.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
 namespace Library.Infrastructure.Data
 {
@@ -10,7 +9,6 @@ namespace Library.Infrastructure.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            Database.EnsureCreated();
         }
         public DbSet<Book> Books { get; set; }
         public DbSet<Author> Authors { get; set; }
@@ -21,7 +19,6 @@ namespace Library.Infrastructure.Data
             base.OnModelCreating(builder);
             
             // fluent api
-            //builder.ApplyConfiguration(new BaseEntityConfiguration());
             builder.ApplyConfiguration(new AuthorConfiguration());
             builder.ApplyConfiguration(new BookConfiguration());
         }

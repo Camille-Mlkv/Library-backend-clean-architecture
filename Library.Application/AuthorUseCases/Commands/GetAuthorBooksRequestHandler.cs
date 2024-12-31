@@ -2,7 +2,7 @@
 
 namespace Library.Application.AuthorUseCases.Commands
 {
-    public class GetAuthorBooksRequestHandler : IRequestHandler<GetAuthorBooksRequest, ResponseData<Author>
+    public class GetAuthorBooksRequestHandler : IRequestHandler<GetAuthorBooksRequest, ResponseData<Author>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;

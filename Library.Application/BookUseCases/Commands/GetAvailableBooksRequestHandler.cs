@@ -1,5 +1,4 @@
 ﻿using Library.Application.BookUseCases.Queries;
-using Library.Domain.Entities;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -25,7 +24,7 @@ namespace Library.Application.BookUseCases.Commands
             }
             try
             {
-                var bookList = (await _unitOfWork.BookRepository.GetPagedListAsync(request.PageNo, request.PageSize, cancellationToken, b => b.ClientId == null)).Items;
+                var bookList = await _unitOfWork.BookRepository.GetPagedListAsync(request.PageNo, request.PageSize, cancellationToken, b => b.ClientId == null);
                 var booksDtos = _mapper.Map<List<BookDTO>>(bookList);
                 response.Result = booksDtos;
                 response.Message = "Available books retrieved successfully.";

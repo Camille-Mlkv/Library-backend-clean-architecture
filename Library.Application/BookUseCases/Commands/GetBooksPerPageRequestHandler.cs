@@ -25,7 +25,7 @@ namespace Library.Application.BookUseCases.Commands
             }
             try
             {
-                var bookList=(await _unitOfWork.BookRepository.GetPagedListAsync(request.PageNo, request.PageSize, cancellationToken)).Items;
+                var bookList=await _unitOfWork.BookRepository.GetPagedListAsync(request.PageNo, request.PageSize, cancellationToken);
                 var booksDtos = _mapper.Map<List<BookDTO>>(bookList);
                 responseData.Result = booksDtos;
                 responseData.Message = "Books retrieved successfully.";

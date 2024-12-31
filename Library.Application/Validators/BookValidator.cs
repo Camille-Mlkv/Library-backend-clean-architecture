@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using Library.Application.DTOs;
 using Microsoft.AspNetCore.Http;
 
 namespace Library.Application.Validators

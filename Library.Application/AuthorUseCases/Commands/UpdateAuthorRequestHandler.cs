@@ -18,10 +18,20 @@ namespace Library.Application.AuthorUseCases.Commands
             var responseData = new ResponseData<AuthorDTO>();
             try
             {
+                var found_author = await _unitOfWork.AuthorRepository.GetByIdAsync(request.id);
+                if (found_author is null)
+                {
+                    responseData.IsSuccess = false;
+                    responseData.Message = "Author with this id doesn't exist.";
+                    responseData.StatusCode = 404;
+                    return responseData;
+                }
+
                 var author = _mapper.Map<Author>(request.author);
                 author.Id = request.id;
                 await _unitOfWork.AuthorRepository.UpdateAsync(author,cancellationToken);
                 await _unitOfWork.SaveAllAsync();
+
                 responseData.IsSuccess = true;
                 responseData.Message = "Author updated successfully.";
                 responseData.StatusCode = 204;

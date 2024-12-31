@@ -29,7 +29,6 @@ namespace Library.CoreAPI.Controllers
             return StatusCode(500, response);
         }
 
-        // Refresh access token
         [HttpPost("refresh")]
         public async Task<IActionResult> RefreshAccessToken([FromBody] RefreshModelDTO model)
         {
@@ -37,7 +36,6 @@ namespace Library.CoreAPI.Controllers
             return StatusCode(response.StatusCode, response); 
         }
 
-        // Revoke
         [HttpDelete("revoke")]
         public async Task<IActionResult> RevokeRefreshToken(string username)
         {

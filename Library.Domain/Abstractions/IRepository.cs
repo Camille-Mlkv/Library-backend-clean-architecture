@@ -1,10 +1,4 @@
-﻿using Library.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace Library.Domain.Abstractions
 {
@@ -70,7 +64,7 @@ namespace Library.Domain.Abstractions
         /// <param name="pageSize">Количество элементов на странице</param>
         /// <param name="cancellationToken"></param>
         /// <returns>Отфильтрованный список сущностей с учетом пагинации</returns>
-        Task<ListModel<T>> GetPagedListAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default, Expression<Func<T, bool>>? filter = null);
+        Task<List<T>> GetPagedListAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default, Expression<Func<T, bool>>? filter = null);
 
     }
 }
