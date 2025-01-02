@@ -1,4 +1,5 @@
 ﻿using Library.Application.AuthorUseCases.Queries;
+using Library.Application.Utilities;
 
 
 namespace Library.Application.AuthorUseCases.Commands
@@ -16,32 +17,19 @@ namespace Library.Application.AuthorUseCases.Commands
         public async Task<ResponseData<AuthorDTO>> Handle(UpdateAuthorRequest request, CancellationToken cancellationToken)
         {
             var responseData = new ResponseData<AuthorDTO>();
-            try
+            var found_author = await _unitOfWork.AuthorRepository.GetByIdAsync(request.id);
+            if (found_author is null)
             {
-                var found_author = await _unitOfWork.AuthorRepository.GetByIdAsync(request.id);
-                if (found_author is null)
-                {
-                    responseData.IsSuccess = false;
-                    responseData.Message = "Author with this id doesn't exist.";
-                    responseData.StatusCode = 404;
-                    return responseData;
-                }
-
-                var author = _mapper.Map<Author>(request.author);
-                author.Id = request.id;
-                await _unitOfWork.AuthorRepository.UpdateAsync(author,cancellationToken);
-                await _unitOfWork.SaveAllAsync();
-
-                responseData.IsSuccess = true;
-                responseData.Message = "Author updated successfully.";
-                responseData.StatusCode = 204;
+                throw new CustomHttpException(404, "Not found.", $"Author with id {request.id} doesn't exist.");
             }
-            catch (Exception ex)
-            {
-                responseData.IsSuccess = false;
-                responseData.Message = $"Error updating author: {ex.Message}";
-                responseData.StatusCode = 500;
-            }
+
+            var author = _mapper.Map<Author>(request.author);
+            author.Id = request.id;
+            await _unitOfWork.AuthorRepository.UpdateAsync(author,cancellationToken);
+            await _unitOfWork.SaveAllAsync();
+
+            responseData.IsSuccess = true;
+            responseData.Message = "Author updated successfully.";
             return responseData;
         }
     }

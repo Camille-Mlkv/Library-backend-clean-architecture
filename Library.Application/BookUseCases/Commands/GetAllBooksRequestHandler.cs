@@ -16,22 +16,12 @@ namespace Library.Application.BookUseCases.Commands
         public async Task<ResponseData<List<BookDTO>>> Handle(GetAllBooksRequest request, CancellationToken cancellationToken)
         {
             var responseData = new ResponseData<List<BookDTO>>();
-            try
-            {
-                var booksList = await _unitOfWork.BookRepository.ListAllAsync(cancellationToken);
-                var booksDtos = _mapper.Map<List<BookDTO>>(booksList);
+            var booksList = await _unitOfWork.BookRepository.ListAllAsync(cancellationToken);
+            var booksDtos = _mapper.Map<List<BookDTO>>(booksList);
 
-                responseData.Result = booksDtos;
-                responseData.IsSuccess = true;
-                responseData.Message = "All books are retrieved.";
-                responseData.StatusCode = 200;
-            }
-            catch (Exception ex)
-            {
-                responseData.IsSuccess = false;
-                responseData.Message = $"An error occured:{ex.Message}.";
-                responseData.StatusCode = 500;
-            }
+            responseData.Result = booksDtos;
+            responseData.IsSuccess = true;
+            responseData.Message = "All books are retrieved.";
             return responseData;
         }
     }

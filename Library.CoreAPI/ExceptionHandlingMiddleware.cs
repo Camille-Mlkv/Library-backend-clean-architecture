@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using Library.Application.Utilities;
+using System.Net;
 using System.Text.Json;
 
 namespace Library.Infrastructure
@@ -20,10 +21,15 @@ namespace Library.Infrastructure
             {
                 await _next(context);
             }
+            catch (CustomHttpException ex)
+            {
+                await HandleHttpExceptionAsync(context, ex);
+            }
             catch (Exception ex)
             {
                 await HandleExceptionAsync(context, ex);
             }
+            
         }
 
         private Task HandleExceptionAsync(HttpContext context, Exception exception)
@@ -38,6 +44,25 @@ namespace Library.Infrastructure
                 StatusCode = context.Response.StatusCode,
                 Message = "An unexpected error occurred. Please try again later.",
                 Details = exception.Message
+            };
+
+            var jsonResponse = JsonSerializer.Serialize(response);
+
+            return context.Response.WriteAsync(jsonResponse);
+        }
+
+        private Task HandleHttpExceptionAsync(HttpContext context, CustomHttpException exception)
+        {
+            _logger.LogWarning(exception, "A handled exception occurred.");
+
+            context.Response.StatusCode = exception.StatusCode;
+            context.Response.ContentType = "application/json";
+
+            var response = new
+            {
+                StatusCode = exception.StatusCode,
+                Message = exception.Message,
+                Details = exception.Details
             };
 
             var jsonResponse = JsonSerializer.Serialize(response);

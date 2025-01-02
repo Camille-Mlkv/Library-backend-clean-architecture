@@ -1,5 +1,6 @@
 ﻿using Library.Application.AuthenticationUseCases.Queries;
 using Library.Application.DTOs.Identity;
+using Library.Application.Utilities;
 
 
 namespace Library.Application.AuthenticationUseCases.Commands
@@ -8,56 +9,42 @@ namespace Library.Application.AuthenticationUseCases.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenGenerator _jwtTokenGenerator;
+        private readonly IMapper _mapper;
 
-        public RefreshAccessTokenRequestHandler(IUnitOfWork unitOfWork,ITokenGenerator tokenGenerator)
+        public RefreshAccessTokenRequestHandler(IUnitOfWork unitOfWork,ITokenGenerator tokenGenerator, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _jwtTokenGenerator = tokenGenerator;
+            _mapper = mapper;
         }
         public async Task<ResponseData<LoginResponseDTO>> Handle(RefreshAccessTokenRequest request, CancellationToken cancellationToken)
         {
             var response = new ResponseData<LoginResponseDTO>();
-            try
+            var principal = _jwtTokenGenerator.GetPrincipalFromExpiredToken(request.RefreshModel.AccessToken);
+            if (principal?.Identity?.Name is null)
             {
-                var principal = _jwtTokenGenerator.GetPrincipalFromExpiredToken(request.RefreshModel.AccessToken);
-                if (principal?.Identity?.Name is null)
-                {
-                    response.Message = "Access token not refreshed";
-                    response.IsSuccess = false;
-                    response.StatusCode = 401;
-                    return response;
-                }
-
-                var user = await _unitOfWork.UserRepository.GetUserByUsername(principal.Identity.Name);
-                if (user is null || user.RefreshToken != request.RefreshModel.RefreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
-                {
-                    response.Message = "Access token not refreshed";
-                    response.IsSuccess = false;
-                    response.StatusCode = 400;
-                    return response;
-                }
-                var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
-                var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
-
-                LoginResponseDTO loginResponseDTO = new()
-                {
-                    User = user,
-                    AccessToken = accessToken.AccessToken,
-                    Expiration = accessToken.Expiry,
-                    RefreshToken = request.RefreshModel.RefreshToken,
-                };
-
-                response.Result = loginResponseDTO;
-                response.IsSuccess = true;
-                response.Message = "Access token refreshed";
-                response.StatusCode = 200;
+                throw new CustomHttpException(400, "Access token not refreshed.", "Old access token is invalid.");
             }
-            catch (Exception ex)
+
+            var user = await _unitOfWork.UserRepository.GetUserByUsername(principal.Identity.Name);
+            if (user is null || user.RefreshToken != request.RefreshModel.RefreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
             {
-                response.IsSuccess = false;
-                response.Message = $"An error occured while refreshing jwt token in:{ex}";
-                response.StatusCode = 500;
+                throw new CustomHttpException(400, "Access token not refreshed.", "Refresh token expired or is invalid.");
             }
+            var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
+            var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);
+
+            LoginResponseDTO loginResponseDTO = new()
+            {
+                User = _mapper.Map<UserDTO>(user),
+                AccessToken = accessToken.AccessToken,
+                Expiration = accessToken.Expiry,
+                RefreshToken = request.RefreshModel.RefreshToken,
+            };
+
+            response.Result = loginResponseDTO;
+            response.IsSuccess = true;
+            response.Message = "Access token refreshed";
             return response;
         }
     }

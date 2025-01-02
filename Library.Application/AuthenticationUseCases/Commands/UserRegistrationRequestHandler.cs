@@ -1,52 +1,47 @@
 ﻿using Library.Application.AuthenticationUseCases.Queries;
+using Library.Application.DTOs.Identity;
+using Library.Application.Utilities;
 
 namespace Library.Application.AuthenticationUseCases.Commands
 {
-    public class UserRegistrationRequestHandler : IRequestHandler<UserRegistrationRequest, ResponseData<User>>
+    public class UserRegistrationRequestHandler : IRequestHandler<UserRegistrationRequest, ResponseData<UserDTO>>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public UserRegistrationRequestHandler(IUnitOfWork unitOfWork)
+        public UserRegistrationRequestHandler(IUnitOfWork unitOfWork,IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
-        public async Task<ResponseData<User>> Handle(UserRegistrationRequest request, CancellationToken cancellationToken)
+        public async Task<ResponseData<UserDTO>> Handle(UserRegistrationRequest request, CancellationToken cancellationToken)
         {
-            var response = new ResponseData<User>();
-            try
+            var response = new ResponseData<UserDTO>();
+            User user = new()
             {
-                User user = new()
-                {
-                    UserName = request.RegistrationRequest.Email,
-                    Email = request.RegistrationRequest.Email,
-                    Name = request.RegistrationRequest.Name,
-                    PhoneNumber = request.RegistrationRequest.PhoneNumber
-                };
+                UserName = request.RegistrationRequest.Email,
+                Email = request.RegistrationRequest.Email,
+                Name = request.RegistrationRequest.Name,
+                PhoneNumber = request.RegistrationRequest.PhoneNumber
+            };
+            if(!(await _unitOfWork.UserRepository.RoleExists(request.RegistrationRequest.Role)))
+            {
                 await _unitOfWork.UserRepository.CreateRole(request.RegistrationRequest.Role);
-
-                var userCreated = await _unitOfWork.UserRepository.CreateUser(user, request.RegistrationRequest.Password);
-
-                if (userCreated is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = "An error occured while registrating the user";
-                    response.StatusCode = 404;
-                    return response;
-                }
-
-                await _unitOfWork.UserRepository.AddRoleToUser(userCreated, request.RegistrationRequest.Role);
-                response.IsSuccess = true;
-                response.Message = "Registrated successfully";
-                response.Result = userCreated;
-                response.StatusCode = 200;
             }
-            catch (Exception ex)
+                
+            var userCreated = await _unitOfWork.UserRepository.CreateUser(user, request.RegistrationRequest.Password);
+
+            if (userCreated is null)
             {
-                response.IsSuccess = false;
-                response.Message = $"An error occured during registration: {ex.Message}";
-                response.StatusCode = 500;
+                throw new CustomHttpException(400, "Bad request.", $"User not created.");
             }
-            
+
+            await _unitOfWork.UserRepository.AddRoleToUser(userCreated, request.RegistrationRequest.Role);
+
+            var userDto=_mapper.Map<UserDTO>(userCreated);
+            response.IsSuccess = true;
+            response.Message = "Registrated successfully";
+            response.Result = userDto;
             return response;
            
         }

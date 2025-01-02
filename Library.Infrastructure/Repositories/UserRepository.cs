@@ -1,5 +1,9 @@
-﻿using Library.Infrastructure.Identity;
+﻿using AutoMapper;
+using Library.Infrastructure.Data;
+using Library.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Library.Infrastructure.Repositories
 {
@@ -7,121 +11,54 @@ namespace Library.Infrastructure.Repositories
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-
-        public UserRepository(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager) 
+        private readonly IMapper _mapper;
+        public UserRepository(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager,IMapper mapper) 
         {
             _userManager = userManager;
             _roleManager = roleManager;
-        }
-
-        public async Task<bool> UserExists(string userName)
-        {
-            var user = await _userManager.FindByNameAsync(userName);
-            if (user is null)
-            {
-                return false;
-            }
-            return true;
+            _mapper = mapper;
         }
 
         public async Task<User> GetUserById(string userId)
         {
             var applicationUser = await _userManager.FindByIdAsync(userId);
-
-            if (applicationUser == null)
-            {
-                return null;
-            }
-
-            //mapping
-            return new User
-            {
-                Id = applicationUser.Id,
-                UserName = applicationUser.UserName,
-                Email = applicationUser.Email,
-                Name = applicationUser.Name,
-                PhoneNumber = applicationUser.PhoneNumber,
-                RefreshToken = applicationUser.RefreshToken,
-                RefreshTokenExpiry = applicationUser.RefreshTokenExpiry,
-            };
+            var user = _mapper.Map<User>(applicationUser);
+            return user;
         }
 
         public async Task<User> GetUserByUsername(string username)
         {
             var applicationUser = await _userManager.FindByEmailAsync(username);
-
-            if (applicationUser == null)
-            {
-                return null;
-            }
-
-            //mapping
-            return new User
-            {
-                Id = applicationUser.Id,
-                UserName = applicationUser.UserName,
-                Email = applicationUser.Email,
-                Name = applicationUser.Name,
-                PhoneNumber = applicationUser.PhoneNumber,
-                RefreshToken = applicationUser.RefreshToken,
-                RefreshTokenExpiry = applicationUser.RefreshTokenExpiry,
-            };
+            return _mapper.Map<User>(applicationUser);
         }
 
         public async Task<bool> CheckPassword(User user, string password)
         {
-            // mapping
-            ApplicationUser appUser = new()
-            {
-                Id = user.Id,
-                UserName = user.Email,
-                Email = user.Email,
-                NormalizedEmail = user.Email.ToUpper(),
-                Name = user.Name,
-                PhoneNumber = user.PhoneNumber,
-                RefreshToken = user.RefreshToken,
-                RefreshTokenExpiry = user.RefreshTokenExpiry,
-            };
-
-            return await _userManager.CheckPasswordAsync(appUser, password);
+            var appUser=_mapper.Map<ApplicationUser>(user);
+            bool isCorrect= await _userManager.CheckPasswordAsync(appUser, password);
+            return isCorrect;
         }
 
         public async Task<IEnumerable<string>> GetUserRoles(User user)
         {
-            //mapping
-            ApplicationUser appUser = new()
-            {
-                Id = user.Id,
-                UserName = user.Email,
-                Email = user.Email,
-                NormalizedEmail = user.Email.ToUpper(),
-                Name = user.Name,
-                PhoneNumber = user.PhoneNumber,
-                RefreshToken = user.RefreshToken,
-                RefreshTokenExpiry = user.RefreshTokenExpiry,
-            };
-
-            return await _userManager.GetRolesAsync(appUser);
+            var appUser=_mapper.Map<ApplicationUser>(user);
+            var roles= await _userManager.GetRolesAsync(appUser);
+            return roles;
         }
 
         public async Task UpdateUser(User user)
         {
-            ApplicationUser appUser = new()
+            var appUser=await _userManager.FindByIdAsync(user.Id);
+            if (appUser is null) 
             {
-                Id = user.Id,
-                UserName = user.Email,
-                Email = user.Email,
-                NormalizedEmail = user.Email.ToUpper(),
-                Name = user.Name,
-                PhoneNumber = user.PhoneNumber,
-                RefreshToken = user.RefreshToken,
-                RefreshTokenExpiry = user.RefreshTokenExpiry,
-            };
+                return;
+            }
 
             appUser.RefreshToken = user.RefreshToken;
-            appUser.RefreshTokenExpiry= user.RefreshTokenExpiry;
+            appUser.RefreshTokenExpiry = user.RefreshTokenExpiry;
+
             await _userManager.UpdateAsync(appUser);
-            
+
         }
 
         public async Task CreateRole(string role)
@@ -136,50 +73,22 @@ namespace Library.Infrastructure.Repositories
 
         public async Task<User> CreateUser(User user, string password)
         {
-            //mapping
-            ApplicationUser appUser = new()
-            {
-                UserName = user.Email,
-                Email = user.Email,
-                NormalizedEmail = user.Email.ToUpper(),
-                Name = user.Name,
-                PhoneNumber = user.PhoneNumber,
-                RefreshToken = user.RefreshToken,
-                RefreshTokenExpiry = user.RefreshTokenExpiry,
-            };
-            
+            var appUser = _mapper.Map<ApplicationUser>(user);
+            appUser.Id = Guid.NewGuid().ToString();
+
             var result = await _userManager.CreateAsync(appUser, password);
-            User userToReturn = new()
-            {
-                Id=appUser.Id,
-                UserName=appUser.UserName,
-                Email=appUser.Email,
-                PhoneNumber=appUser.PhoneNumber,
-                Name=appUser.Name,
-                RefreshToken=appUser.RefreshToken,
-                RefreshTokenExpiry=appUser.RefreshTokenExpiry,
-            };
-            return userToReturn;
+            return _mapper.Map<User>(appUser);
         }
 
         
         public async Task AddRoleToUser(User user, string role)
         {
-            //mapping
-            ApplicationUser appUser = new()
+            var appUser = await _userManager.FindByIdAsync(user.Id);
+            if (appUser is null)
             {
-                Id = user.Id,
-                UserName = user.Email,
-                Email = user.Email,
-                NormalizedEmail = user.Email.ToUpper(),
-                Name = user.Name,
-                PhoneNumber = user.PhoneNumber,
-                RefreshToken = user.RefreshToken,
-                RefreshTokenExpiry = user.RefreshTokenExpiry,
-            };
-
+                return;
+            }
             await _userManager.AddToRoleAsync(appUser, role);
-            
             
         }
     }

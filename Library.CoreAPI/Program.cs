@@ -6,6 +6,7 @@ using Library.Infrastructure.Identity.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Library.CoreAPI.Extensions;
+using Library.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,8 +45,9 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
+builder.Services.AddAutoMapper(typeof(ApplicationMappingProfile), typeof(InfrastructureMappingProfile));
 builder.Services.AddPersistence(); // UoW, Repository, FileService
-builder.Services.ConfigureApplicationServices(); // MediatR, AutoMapper,Fluent Validation
+builder.Services.ConfigureApplicationServices(); // MediatR,Fluent Validation
 builder.Services.AddIdentity(); //UserRepository, JwtTokenGenerator, Identity
 
 builder.AddAppAuthentication(); // extension method

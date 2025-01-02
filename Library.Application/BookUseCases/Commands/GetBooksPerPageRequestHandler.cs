@@ -1,4 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
+using Library.Application.Utilities;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -18,26 +19,14 @@ namespace Library.Application.BookUseCases.Commands
             var responseData = new ResponseData<List<BookDTO>>();
             if(request.PageNo<1 || request.PageSize < 1)
             {
-                responseData.IsSuccess = false;
-                responseData.Message = "Provide valid data for page number and size";
-                responseData.StatusCode = 400;
-                return responseData;
+                throw new CustomHttpException(400, "Bad request.", "Provide valid data for page number and page size.");
             }
-            try
-            {
-                var bookList=await _unitOfWork.BookRepository.GetPagedListAsync(request.PageNo, request.PageSize, cancellationToken);
-                var booksDtos = _mapper.Map<List<BookDTO>>(bookList);
-                responseData.Result = booksDtos;
-                responseData.Message = "Books retrieved successfully.";
-                responseData.IsSuccess=true;
-                responseData.StatusCode = 200;
-            }
-            catch (Exception ex)
-            {
-                responseData.IsSuccess = false;
-                responseData.Message = $"Error: {ex.Message}";
-                responseData.StatusCode = 500;
-            }
+
+            var bookList=await _unitOfWork.BookRepository.GetPagedListAsync(request.PageNo, request.PageSize, cancellationToken);
+            var booksDtos = _mapper.Map<List<BookDTO>>(bookList);
+            responseData.Result = booksDtos;
+            responseData.Message = "Books retrieved successfully.";
+            responseData.IsSuccess=true;
             return responseData;
         }
     }

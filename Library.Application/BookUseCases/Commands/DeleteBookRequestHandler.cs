@@ -1,4 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
+using Library.Application.Utilities;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -18,37 +19,22 @@ namespace Library.Application.BookUseCases.Commands
         public async Task<ResponseData<object>> Handle(DeleteBookRequest request, CancellationToken cancellationToken)
         {
             var response = new ResponseData<object>();
-            try
+            var book =await _unitOfWork.BookRepository.GetByIdAsync(request.Id);
+            if(book is null)
             {
-                var book =await _unitOfWork.BookRepository.GetByIdAsync(request.Id);
-                if(book is null)
-                {
-                    response.IsSuccess = false;
-                    response.Message = "Book with this id doesn't exist.";
-                    response.StatusCode = 404;
-                    return response;
-                }
-
-                if (!string.IsNullOrEmpty(book.ImagePath) && book.ImagePath != "default-book.png")
-                {
-                    _fileService.DeleteFileAsync(book.ImagePath);
-                }
-
-                await _unitOfWork.BookRepository.DeleteAsync(book);
-                await _unitOfWork.SaveAllAsync();
-
-                response.IsSuccess = true;
-                response.Message = "Book deleted successfully.";
-                response.StatusCode = 204;
-
-
+                throw new CustomHttpException(404, "Not found.", $"Book with id {request.Id} doesn't exist.");
             }
-            catch (Exception ex)
+
+            if (!string.IsNullOrEmpty(book.ImagePath) && book.ImagePath != "default-book.png")
             {
-                response.IsSuccess = false;
-                response.Message = $"An error occured while deleting a book:{ex}";
-                response.StatusCode = 500;
+                _fileService.DeleteFileAsync(book.ImagePath);
             }
+
+            await _unitOfWork.BookRepository.DeleteAsync(book);
+            await _unitOfWork.SaveAllAsync();
+
+            response.IsSuccess = true;
+            response.Message = "Book deleted successfully.";
             return response;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
+using Library.Application.Utilities;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -16,53 +17,32 @@ namespace Library.Application.BookUseCases.Commands
         public async Task<ResponseData<object>> Handle(AssignBookToClientRequest request, CancellationToken cancellationToken)
         {
             var responseData = new ResponseData<object>();
-            try
+            var found_book = await _unitOfWork.BookRepository.GetByIdAsync(request.BookId);
+            if(found_book is null)
             {
-                var found_book = await _unitOfWork.BookRepository.GetByIdAsync(request.BookId);
-                if(found_book is null)
-                {
-                    responseData.IsSuccess = false;
-                    responseData.Message = "Book with this id doesn't exist.";
-                    responseData.StatusCode = 404;
-                    return responseData;
-                }
-
-                if (found_book.ClientId != null)
-                {
-                    responseData.IsSuccess = false;
-                    responseData.Message = "Cannot assign the book as it's already assigned.";
-                    responseData.StatusCode = 409;
-                    return responseData;
-                }
-
-                var clientExists = await _unitOfWork.UserRepository.UserExists(request.ClientId);
-                if (!clientExists)
-                {
-                    responseData.IsSuccess = false;
-                    responseData.Message = "Client is invalid.";
-                    responseData.StatusCode = 404;
-                    return responseData;
-                }
-
-                found_book.ClientId = request.ClientId;
-                found_book.TakenTime= DateTime.UtcNow;
-                found_book.ReturnBy= DateTime.UtcNow.AddDays(14);
-
-                await _unitOfWork.BookRepository.UpdateAsync(found_book, cancellationToken);
-                await _unitOfWork.SaveAllAsync();
-
-                responseData.IsSuccess = true;
-                responseData.Message = $"Book assigned to client {request.ClientId}.";
-                responseData.StatusCode = 204;
-                
-         
+                throw new CustomHttpException(404, "Not found.", $"Book with id {request.BookId} doesn't exist.");
             }
-            catch (Exception ex)
+
+            if (found_book.ClientId != null)
             {
-                responseData.IsSuccess = false;
-                responseData.Message = $"Error assigning book: {ex.Message}";
-                responseData.StatusCode = 500;
+                throw new CustomHttpException(409, "Conflict.", "Cannot assign the book as it's already assigned.");
             }
+
+            var existingClient = await _unitOfWork.UserRepository.GetUserById(request.ClientId);
+            if (existingClient is null)
+            {
+                throw new CustomHttpException(404, "Not found.", $"User with {request.ClientId} is invalid");
+            }
+
+            found_book.ClientId = request.ClientId;
+            found_book.TakenTime= DateTime.UtcNow;
+            found_book.ReturnBy= DateTime.UtcNow.AddDays(14);
+
+            await _unitOfWork.BookRepository.UpdateAsync(found_book, cancellationToken);
+            await _unitOfWork.SaveAllAsync();
+
+            responseData.IsSuccess = true;
+            responseData.Message = $"Book assigned to client {request.ClientId}.";
             return responseData;
         }
     }

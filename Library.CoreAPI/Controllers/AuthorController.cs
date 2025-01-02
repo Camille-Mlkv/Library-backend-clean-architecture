@@ -21,7 +21,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> GetAll()
         {
             var response= await _mediator.Send(new GetAllAuthorsRequest());
-            return StatusCode(response.StatusCode,response.Result);
+            return Ok(response);
         }
 
         [HttpGet]
@@ -29,7 +29,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> Get(int id)
         {
             var response = await _mediator.Send(new GetAuthorByIdRequest(id));
-            return StatusCode(response.StatusCode, response.Message);
+            return Ok(response);
         }
 
         [HttpPost]
@@ -37,12 +37,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> Post([FromBody] AuthorDTO newAuthor)
         {
             var response = await _mediator.Send(new AddAuthorRequest(newAuthor));
-            if (response.IsSuccess)
-            {
-                return CreatedAtAction(nameof(Post), new { id = response.Result.Id }, response.Result); // 201
-            }
-            return StatusCode(response.StatusCode, response.Message);
-
+            return CreatedAtAction(nameof(Post), new { id = response.Result.Id }, response.Result);
         }
 
         [HttpPut("{id}")]
@@ -50,7 +45,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> Put(int id, [FromBody] AuthorDTO author)
         {
             var response = await _mediator.Send(new UpdateAuthorRequest(id, author));
-            return StatusCode(response.StatusCode, response.Message);
+            return StatusCode(204, response.Message);
         }
 
         [HttpDelete("{id}")]
@@ -58,7 +53,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _mediator.Send(new DeleteAuthorRequest(id));
-            return StatusCode(response.StatusCode, response.Message);
+            return StatusCode(204, response.Message);
         }
 
         [HttpGet]
@@ -66,7 +61,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> GetBooksByAuthorId(int id)
         {
             var response = await _mediator.Send(new GetAuthorBooksRequest(id));
-            return StatusCode(response.StatusCode, response);
+            return Ok(response);
         }
     }
 }

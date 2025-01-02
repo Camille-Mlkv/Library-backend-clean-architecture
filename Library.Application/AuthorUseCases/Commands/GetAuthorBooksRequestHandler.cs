@@ -1,4 +1,5 @@
 ﻿using Library.Application.AuthorUseCases.Queries;
+using Library.Application.Utilities;
 
 namespace Library.Application.AuthorUseCases.Commands
 {
@@ -15,28 +16,14 @@ namespace Library.Application.AuthorUseCases.Commands
         public async Task<ResponseData<Author>> Handle(GetAuthorBooksRequest request, CancellationToken cancellationToken)
         {
             var responseData = new ResponseData<Author>();
-            try
+            var authorWithBooks=await _unitOfWork.AuthorRepository.ListAsync(a => a.Id == request.id, cancellationToken, a => a.Books);
+            if(authorWithBooks is null)
             {
-                var authorWithBooks=await _unitOfWork.AuthorRepository.ListAsync(a => a.Id == request.id, cancellationToken, a => a.Books);
-                if(authorWithBooks is null)
-                {
-                    responseData.IsSuccess = false;
-                    responseData.Message = "Author with this id doesn't exist.";
-                    responseData.StatusCode = 404;
-                    return responseData;
-                }
-                responseData.Result = authorWithBooks.First();
-                responseData.IsSuccess = true;
-                responseData.Message = "Books found for specified author.";
-                responseData.StatusCode = 200;
-
+                throw new CustomHttpException(404, "Not found.", $"Author with id {request.id} doesn't exist.");
             }
-            catch (Exception ex)
-            {
-                responseData.IsSuccess = false;
-                responseData.Message = $"An error occured: {ex.Message}";
-                responseData.StatusCode = 500;
-            }
+            responseData.Result = authorWithBooks.First();
+            responseData.IsSuccess = true;
+            responseData.Message = "Books found for specified author.";
             return responseData;
         }
     }

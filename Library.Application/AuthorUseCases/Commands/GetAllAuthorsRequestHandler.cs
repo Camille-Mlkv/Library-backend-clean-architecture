@@ -15,22 +15,12 @@ namespace Library.Application.AuthorUseCases.Commands
         public async Task<ResponseData<List<AuthorDTO>>> Handle(GetAllAuthorsRequest request, CancellationToken cancellationToken)
         {
             var responseData=new ResponseData<List<AuthorDTO>>();
-            try
-            {
-                var authorsList = await _unitOfWork.AuthorRepository.ListAllAsync(cancellationToken);
-                var authorDtos=_mapper.Map<List<AuthorDTO>>(authorsList);
+            var authorsList = await _unitOfWork.AuthorRepository.ListAllAsync(cancellationToken);
+            var authorDtos=_mapper.Map<List<AuthorDTO>>(authorsList);
 
-                responseData.Result= authorDtos;
-                responseData.IsSuccess = true;
-                responseData.StatusCode = 200;
-                responseData.Message = "All authors are retrieved.";
-            }
-            catch (Exception ex)
-            {
-                responseData.IsSuccess = false;
-                responseData.Message = $"An error occured:{ex.Message}.";
-                responseData.StatusCode = 500;
-            }
+            responseData.Result= authorDtos;
+            responseData.IsSuccess = true;
+            responseData.Message = "All authors are retrieved.";
             return responseData;
         }
     }

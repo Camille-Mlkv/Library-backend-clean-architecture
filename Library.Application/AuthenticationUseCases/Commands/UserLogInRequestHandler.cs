@@ -1,5 +1,6 @@
 ﻿using Library.Application.AuthenticationUseCases.Queries;
 using Library.Application.DTOs.Identity;
+using Library.Application.Utilities;
 
 namespace Library.Application.AuthenticationUseCases.Commands
 {
@@ -7,60 +8,46 @@ namespace Library.Application.AuthenticationUseCases.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenGenerator _jwtTokenGenerator;
+        private readonly IMapper _mapper;
 
-        public UserLogInRequestHandler(IUnitOfWork unitOfWork, ITokenGenerator jwtTokenGenerator)
+        public UserLogInRequestHandler(IUnitOfWork unitOfWork, ITokenGenerator jwtTokenGenerator, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _mapper = mapper;
         }
 
         public async Task<ResponseData<LoginResponseDTO>> Handle(UserLogInRequest request, CancellationToken cancellationToken)
         {
             var response = new ResponseData<LoginResponseDTO>();
+            var user = await _unitOfWork.UserRepository.GetUserByUsername(request.LoginRequest.UserName);
 
-            try
+            if (user == null || !await _unitOfWork.UserRepository.CheckPassword(user, request.LoginRequest.Password))
             {
-                var user = await _unitOfWork.UserRepository.GetUserByUsername(request.LoginRequest.UserName);
-
-                if (user == null || !await _unitOfWork.UserRepository.CheckPassword(user, request.LoginRequest.Password))
-                {
-                    response.Message = "Wrong credentials";
-                    response.IsSuccess = false;
-                    response.StatusCode = 401;
-                    return response;
-                }
-
-                var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
-                var (accessToken, expiry) = _jwtTokenGenerator.GenerateAccessToken(user, roles);
-
-                var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
-                user.RefreshToken = refreshToken;
-                user.RefreshTokenExpiry = DateTime.UtcNow.AddHours(24);
-
-                await _unitOfWork.UserRepository.UpdateUser(user);
-                await _unitOfWork.SaveAllAsync();
-
-
-                LoginResponseDTO loginResponseDTO = new()
-                {
-                    User = user,
-                    AccessToken = accessToken,
-                    Expiration = expiry,
-                    RefreshToken = refreshToken,
-                };
-
-                response.Result = loginResponseDTO;
-                response.IsSuccess = true;
-                response.Message = "Login successful";
-                response.StatusCode = 200;
-            }
-            catch (Exception ex)
-            {
-                response.IsSuccess = false;
-                response.Message = $"An error occured while logging in: {ex.Message}";
-                response.StatusCode = 500;
+                throw new CustomHttpException(401, "Unautorized.", "Wrong credentials");
             }
 
+            var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
+            var (accessToken, expiry) = _jwtTokenGenerator.GenerateAccessToken(user, roles);
+
+            var refreshToken = _jwtTokenGenerator.GenerateRefreshToken();
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiry = DateTime.UtcNow.AddHours(24);
+
+            await _unitOfWork.UserRepository.UpdateUser(user);
+            await _unitOfWork.SaveAllAsync();
+
+            LoginResponseDTO loginResponseDTO = new()
+            {
+                User = _mapper.Map<UserDTO>(user),
+                AccessToken = accessToken,
+                Expiration = expiry,
+                RefreshToken = refreshToken,
+            };
+
+            response.Result = loginResponseDTO;
+            response.IsSuccess = true;
+            response.Message = "Login successful";
             return response;
         }
     }

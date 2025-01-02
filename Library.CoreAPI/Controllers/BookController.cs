@@ -3,6 +3,7 @@ using Library.Application.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Library.Domain.Entities;
 
 namespace Library.CoreAPI.Controllers
 {
@@ -27,7 +28,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> GetAll()
         {
             var response= await _mediator.Send(new GetAllBooksRequest());
-            return StatusCode(response.StatusCode, response);
+            return Ok(response);
         }
 
         [HttpGet]
@@ -35,7 +36,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> Get(int id)
         {
             var response = await _mediator.Send(new GetBookByIdRequest(id));
-            return StatusCode(response.StatusCode, response);
+            return Ok(response);
         }
 
         [HttpGet]
@@ -43,7 +44,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> GetBooksPerPage(int pageNo = 1, int pageSize = 3)
         {
             var response = await _mediator.Send(new GetBooksPerPageRequest(pageNo, pageSize));
-            return StatusCode(response.StatusCode, response);
+            return Ok(response);
         }
 
         [HttpPost]
@@ -51,12 +52,8 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> Post([FromForm] BookDTO newBook)
         {
             var response = await _mediator.Send(new AddBookRequest(newBook));
-            if(response.IsSuccess)
-            {
-                var createdBook = response.Result;
-                return CreatedAtAction(nameof(Post), new { id = createdBook.Id }, createdBook); 
-            }
-            return StatusCode(response.StatusCode, response.Message);
+            var createdBook = response.Result;
+            return CreatedAtAction(nameof(Post), new { id = createdBook.Id }, createdBook); 
         }
 
         [HttpPut("{id}")]
@@ -64,7 +61,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> Put(int id, [FromForm] BookDTO updatedBook)
         {
             var response = await _mediator.Send(new UpdateBookRequest(id, updatedBook));
-            return StatusCode(response.StatusCode, response.Message);
+            return StatusCode(204,response.Message);
         }
 
 
@@ -73,7 +70,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _mediator.Send(new DeleteBookRequest(id));
-            return StatusCode(response.StatusCode, response.Message);
+            return StatusCode(204, response.Message);
         }
 
         [HttpGet]
@@ -81,35 +78,39 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> GetAvailableBooks(int pageNo = 1, int pageSize = 3)
         {
             var response = await _mediator.Send(new GetAvailableBooksRequest(pageNo, pageSize));
-            return StatusCode(response.StatusCode, response);
+            return Ok(response);
         }
 
+        [HttpGet]
+        [Route("genre")]
+        public async Task<IActionResult> GetBooksByGenre(string genre, int pageNo = 1, int pageSize = 3)
+        {
+            var response = await _mediator.Send(new GetBooksByGenreRequest(genre, pageNo, pageSize));
+            return Ok(response);
+        }
 
         [HttpGet]
-        [Route("filtered")]
-        public async Task<IActionResult> GetBooks(string? genre = null, string? isbn = null, int? authorId = null, string? title = null, int pageNo = 1, int pageSize = 3)
+        [Route("isbn")]
+        public async Task<IActionResult> GetBookByIsbn(string isbn, int pageNo = 1, int pageSize = 3)
         {
-            if (!string.IsNullOrEmpty(genre))
-            {
-                var response = await _mediator.Send(new GetBooksByGenreRequest(genre, pageNo, pageSize));
-                return StatusCode(response.StatusCode, response);
-            }
-            else if (!string.IsNullOrEmpty(isbn))
-            {
-                var response = await _mediator.Send(new GetBookByIsbnRequest(isbn, pageNo, pageSize));
-                return StatusCode(response.StatusCode, response);
-            }
-            else if (authorId.HasValue)
-            {
-                var response = await _mediator.Send(new GetBooksByAuthorRequest(authorId.Value, pageNo, pageSize));
-                return StatusCode(response.StatusCode, response);
-            }
-            else if (!string.IsNullOrEmpty(title))
-            {
-                var response = await _mediator.Send(new GetBooksByTitleRequest(title, pageNo, pageSize));
-                return StatusCode(response.StatusCode, response);
-            }
-            else return BadRequest("Choose one of the options");
+            var response = await _mediator.Send(new GetBookByIsbnRequest(isbn, pageNo, pageSize));
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("author")]
+        public async Task<IActionResult> GetBooksByAuthor(int authorId, int pageNo = 1, int pageSize = 3)
+        {
+            var response = await _mediator.Send(new GetBooksByAuthorRequest(authorId, pageNo, pageSize));
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("title")]
+        public async Task<IActionResult> GetBooksByTilte(string title, int pageNo = 1, int pageSize = 3)
+        {
+            var response = await _mediator.Send(new GetBooksByTitleRequest(title, pageNo, pageSize));
+            return Ok(response);
         }
 
         [HttpGet]
@@ -119,7 +120,7 @@ namespace Library.CoreAPI.Controllers
         {
             var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var response= await _mediator.Send(new GetClientBooksRequest(clientId,currentUserId));
-            return StatusCode(response.StatusCode, response);
+            return Ok(response);
         }
 
         [HttpPut]
@@ -127,7 +128,7 @@ namespace Library.CoreAPI.Controllers
         public async Task<IActionResult> AssignBookToClient(int bookId, string clientId)
         {
             var response= await _mediator.Send(new AssignBookToClientRequest(bookId, clientId));
-            return StatusCode(response.StatusCode, response.Message);
+            return StatusCode(204, response.Message);
         }
 
         [HttpGet("{id}/image")]

@@ -1,4 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
+using Library.Application.Utilities;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -16,9 +17,9 @@ namespace Library.Application.BookUseCases.Commands
         public async Task<byte[]> Handle(GetBookImageRequest request, CancellationToken cancellationToken)
         {
             var book=await _unitOfWork.BookRepository.GetByIdAsync(request.BookId);
-            if(book == null)
+            if(book is null)
             {
-                return null;
+                throw new CustomHttpException(404, "Not found.", $"Book with id {request.BookId} doesn't exist.");
             }
             var imagePath = Path.Combine("wwwroot", "Images", $"{book.ImagePath}");
             var fileBytes = await File.ReadAllBytesAsync(imagePath);

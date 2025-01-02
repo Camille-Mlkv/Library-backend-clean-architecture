@@ -1,4 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
+using Library.Application.Utilities;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -23,47 +24,33 @@ namespace Library.Application.BookUseCases.Commands
             var bytes = new byte[0];
             var filename = "";
 
-            try
+            // image
+            if(formFile != null && formFile.Length > 0)
             {
-                // image
-                if(formFile != null && formFile.Length > 0)
+                using (var memoryStream = new MemoryStream())
                 {
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await formFile.CopyToAsync(memoryStream);
-                        bytes = memoryStream.ToArray();
-                        filename=formFile.FileName;
-                    }
+                    await formFile.CopyToAsync(memoryStream);
+                    bytes = memoryStream.ToArray();
+                    filename=formFile.FileName;
                 }
-
-                request.book.ImagePath=await _fileService.SaveFileAsync(bytes, filename);
-
-                var book = _mapper.Map<Book>(request.book);
-                var bookWithIsbn=await _unitOfWork.BookRepository.ListAsync(b=>b.ISBN==request.book.ISBN);
-                if(bookWithIsbn.Any())
-                {
-                    responseData.IsSuccess = false;
-                    responseData.Message = "Book with this ISBN already exists.";
-                    responseData.StatusCode = 409;
-                    return responseData;
-                }
-
-                await _unitOfWork.BookRepository.AddAsync(book);
-                await _unitOfWork.SaveAllAsync();
-
-                var createdBook = _mapper.Map<BookDTO>(book);
-                responseData.Result = createdBook;
-                responseData.IsSuccess = true;
-                responseData.Message = "Book added successfully.";
-                responseData.StatusCode = 201;
-            }
-            catch (Exception ex)
-            {
-                responseData.IsSuccess = false;
-                responseData.Message = $"Error adding book: {ex.Message}";
-                responseData.StatusCode = 500;
             }
 
+            request.book.ImagePath=await _fileService.SaveFileAsync(bytes, filename);
+
+            var book = _mapper.Map<Book>(request.book);
+            var bookWithIsbn=await _unitOfWork.BookRepository.ListAsync(b=>b.ISBN==request.book.ISBN);
+            if(bookWithIsbn.Any())
+            {
+                throw new CustomHttpException(409, "Conflict.", $"Book with ISBN {request.book.ISBN} already exists.");
+            }
+
+            await _unitOfWork.BookRepository.AddAsync(book);
+            await _unitOfWork.SaveAllAsync();
+
+            var createdBook = _mapper.Map<BookDTO>(book);
+            responseData.Result = createdBook;
+            responseData.IsSuccess = true;
+            responseData.Message = "Book added successfully.";
             return responseData;
         }
     }

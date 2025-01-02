@@ -4,7 +4,6 @@ namespace Library.Domain.Abstractions
 {
     public interface IUserRepository
     {
-        Task<bool> UserExists(string userId);
         Task<User> GetUserById(string userId);
         Task<User> GetUserByUsername(string username);
         Task<bool> CheckPassword(User user, string password);
