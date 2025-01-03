@@ -46,7 +46,7 @@ namespace Library.Infrastructure.Repositories
             return roles;
         }
 
-        public async Task UpdateUser(User user)
+        public async Task UpdateUserTokens(User user)
         {
             var appUser=await _userManager.FindByIdAsync(user.Id);
             if (appUser is null) 

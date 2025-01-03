@@ -20,7 +20,7 @@ namespace Library.Application.AuthenticationUseCases.Commands
                 throw new CustomHttpException(404, "Not found.", $"User with {request.Username} doesn't exist.");
             }
             user.RefreshToken = null;
-            await _unitOfWork.UserRepository.UpdateUser(user);
+            await _unitOfWork.UserRepository.UpdateUserTokens(user);
             await _unitOfWork.SaveAllAsync();
 
             response.IsSuccess = true;

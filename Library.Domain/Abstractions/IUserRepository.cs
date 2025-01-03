@@ -8,7 +8,7 @@ namespace Library.Domain.Abstractions
         Task<User> GetUserByUsername(string username);
         Task<bool> CheckPassword(User user, string password);
         Task<IEnumerable<string>> GetUserRoles(User user);
-        Task UpdateUser(User user);
+        Task UpdateUserTokens(User user);
         Task CreateRole(string role);
         Task<bool> RoleExists(string role);
         Task<User> CreateUser(User user,string password);
