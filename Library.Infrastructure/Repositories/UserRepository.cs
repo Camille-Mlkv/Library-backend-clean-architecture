@@ -76,7 +76,7 @@ namespace Library.Infrastructure.Repositories
             var appUser = _mapper.Map<ApplicationUser>(user);
             appUser.Id = Guid.NewGuid().ToString();
 
-            var result = await _userManager.CreateAsync(appUser, password);
+            await _userManager.CreateAsync(appUser, password);
             return _mapper.Map<User>(appUser);
         }
 

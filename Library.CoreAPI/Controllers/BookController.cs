@@ -3,7 +3,6 @@ using Library.Application.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Library.Domain.Entities;
 
 namespace Library.CoreAPI.Controllers
 {
