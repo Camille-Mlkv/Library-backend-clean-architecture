@@ -1,5 +1,5 @@
 ﻿using Library.Application.AuthorUseCases.Queries;
-using Library.Application.Utilities;
+using Library.Application.Exceptions;
 
 namespace Library.Application.AuthorUseCases.Commands
 {
@@ -19,7 +19,7 @@ namespace Library.Application.AuthorUseCases.Commands
             var authorWithBooks=await _unitOfWork.AuthorRepository.ListAsync(a => a.Id == request.id, cancellationToken, a => a.Books);
             if(authorWithBooks is null)
             {
-                throw new CustomHttpException(404, "Not found.", $"Author with id {request.id} doesn't exist.");
+                throw new NotFoundException($"Author with id {request.id} doesn't exist.");
             }
             responseData.Result = authorWithBooks.First();
             responseData.IsSuccess = true;

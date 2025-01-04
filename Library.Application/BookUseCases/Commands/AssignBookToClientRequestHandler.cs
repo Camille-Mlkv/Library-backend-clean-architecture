@@ -1,5 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
-using Library.Application.Utilities;
+using Library.Application.Exceptions;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -20,18 +20,18 @@ namespace Library.Application.BookUseCases.Commands
             var found_book = await _unitOfWork.BookRepository.GetByIdAsync(request.BookId);
             if(found_book is null)
             {
-                throw new CustomHttpException(404, "Not found.", $"Book with id {request.BookId} doesn't exist.");
+                throw new NotFoundException($"Book with id {request.BookId} doesn't exist.");
             }
 
             if (found_book.ClientId != null)
             {
-                throw new CustomHttpException(409, "Conflict.", "Cannot assign the book as it's already assigned.");
+                throw new ConflictException("Assigning failed.", "Cannot assign the book as it's already assigned.");
             }
 
             var existingClient = await _unitOfWork.UserRepository.GetUserById(request.ClientId);
             if (existingClient is null)
             {
-                throw new CustomHttpException(404, "Not found.", $"User with {request.ClientId} is invalid");
+                throw new NotFoundException($"User with id {request.ClientId} doesn't exist.");
             }
 
             found_book.ClientId = request.ClientId;

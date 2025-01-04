@@ -1,6 +1,6 @@
 ﻿using Library.Application.AuthenticationUseCases.Queries;
 using Library.Application.DTOs.Identity;
-using Library.Application.Utilities;
+using Library.Application.Exceptions;
 
 namespace Library.Application.AuthenticationUseCases.Commands
 {
@@ -33,7 +33,7 @@ namespace Library.Application.AuthenticationUseCases.Commands
 
             if (userCreated is null)
             {
-                throw new CustomHttpException(400, "Bad request.", $"User not created.");
+                throw new BadRequestException("User not created.");
             }
 
             await _unitOfWork.UserRepository.AddRoleToUser(userCreated, request.RegistrationRequest.Role);

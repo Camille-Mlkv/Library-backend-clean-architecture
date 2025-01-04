@@ -1,5 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
-using Library.Application.Utilities;
+using Library.Application.Exceptions;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -18,9 +18,9 @@ namespace Library.Application.BookUseCases.Commands
             var responseData = new ResponseData<BookDTO>();
 
             var found_book = await _unitOfWork.BookRepository.GetByIdAsync(request.id);
-            if (found_book == null)
+            if (found_book is null)
             {
-                throw new CustomHttpException(404, "Not found.", $"Book with id {request.id} doesn't exist.");
+                throw new NotFoundException($"Book with id {request.id} doesn't exist.");
             }
 
             var book = _mapper.Map<BookDTO>(found_book);

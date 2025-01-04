@@ -1,5 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
-using Library.Application.Utilities;
+using Library.Application.Exceptions;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -18,7 +18,7 @@ namespace Library.Application.BookUseCases.Commands
             var response = new ResponseData<List<BookDTO>>();
             if (request.PageNo < 1 || request.PageSize < 1)
             {
-                throw new CustomHttpException(400, "Bad request.", "Provide valid data for page number and page size.");
+                throw new BadRequestException("Failed to load data.", "Provide valid data for page number and page size.");
             }
             
             var bookList = await _unitOfWork.BookRepository.GetPagedListAsync(request.PageNo, request.PageSize, cancellationToken, b => b.AuthorId == request.AuthorId);

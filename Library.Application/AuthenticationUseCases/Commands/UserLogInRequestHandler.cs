@@ -1,6 +1,6 @@
 ﻿using Library.Application.AuthenticationUseCases.Queries;
 using Library.Application.DTOs.Identity;
-using Library.Application.Utilities;
+using Library.Application.Exceptions;
 
 namespace Library.Application.AuthenticationUseCases.Commands
 {
@@ -24,7 +24,7 @@ namespace Library.Application.AuthenticationUseCases.Commands
 
             if (user == null || !await _unitOfWork.UserRepository.CheckPassword(user, request.LoginRequest.Password))
             {
-                throw new CustomHttpException(401, "Unautorized.", "Wrong credentials");
+                throw new UnauthorizedException("Wrong credentials");
             }
 
             var roles = await _unitOfWork.UserRepository.GetUserRoles(user);

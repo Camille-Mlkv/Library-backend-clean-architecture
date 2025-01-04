@@ -1,5 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
-using Library.Application.Utilities;
+using Library.Application.Exceptions;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -22,7 +22,7 @@ namespace Library.Application.BookUseCases.Commands
             var book =await _unitOfWork.BookRepository.GetByIdAsync(request.Id);
             if(book is null)
             {
-                throw new CustomHttpException(404, "Not found.", $"Book with id {request.Id} doesn't exist.");
+                throw new NotFoundException("Delete operation failed.",$"Book with id {request.Id} doesn't exist.");
             }
 
             if (!string.IsNullOrEmpty(book.ImagePath) && book.ImagePath != "default-book.png")

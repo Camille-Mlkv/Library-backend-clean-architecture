@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
 using Library.Infrastructure.Identity;
 
-namespace Library.Infrastructure.Services
+namespace Library.Infrastructure.MappingProfiles
 {
-    public class InfrastructureMappingProfile:Profile
+    public class ApplicationUserProfile : Profile
     {
-        public InfrastructureMappingProfile()
+        public ApplicationUserProfile()
         {
             CreateMap<ApplicationUser, User>().ReverseMap();
         }

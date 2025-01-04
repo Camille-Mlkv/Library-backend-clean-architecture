@@ -1,6 +1,5 @@
 ﻿using Library.Application.AuthorUseCases.Queries;
-using Library.Application.Utilities;
-
+using Library.Application.Exceptions;
 
 namespace Library.Application.AuthorUseCases.Commands
 {
@@ -21,13 +20,13 @@ namespace Library.Application.AuthorUseCases.Commands
             var author=await _unitOfWork.AuthorRepository.GetByIdAsync(request.id);
             if (author is null)
             {
-                throw new CustomHttpException(404, "Not found.", $"Author with id {request.id} dosen't exist.");
+                throw new NotFoundException($"Author with id {request.id} dosen't exist.");
             }
 
             var books = await _unitOfWork.BookRepository.ListAsync(b => b.AuthorId == request.id);
             if (books.Any())
             {
-                throw new CustomHttpException(409, "Conflict.", $"Author with id {request.id} can't be deleted as it has associated books.");
+                throw new ConflictException("Delete operation failed.", $"Author with id {request.id} can't be deleted as it has associated books.");
             }
 
             await _unitOfWork.AuthorRepository.DeleteAsync(author);

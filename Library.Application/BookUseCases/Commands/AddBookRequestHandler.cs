@@ -1,5 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
-using Library.Application.Utilities;
+using Library.Application.Exceptions;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -41,7 +41,7 @@ namespace Library.Application.BookUseCases.Commands
             var bookWithIsbn=await _unitOfWork.BookRepository.ListAsync(b=>b.ISBN==request.book.ISBN);
             if(bookWithIsbn.Any())
             {
-                throw new CustomHttpException(409, "Conflict.", $"Book with ISBN {request.book.ISBN} already exists.");
+                throw new ConflictException("Resource already exists.", $"Book with ISBN {request.book.ISBN} already exists.");
             }
 
             await _unitOfWork.BookRepository.AddAsync(book);

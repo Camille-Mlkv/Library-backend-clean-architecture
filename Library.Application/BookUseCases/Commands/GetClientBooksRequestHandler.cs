@@ -1,5 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
-using Library.Application.Utilities;
+using Library.Application.Exceptions;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -20,7 +20,7 @@ namespace Library.Application.BookUseCases.Commands
             var user = await _unitOfWork.UserRepository.GetUserById(request.CurrentUserId);
             if (user is null)
             {
-                throw new CustomHttpException(401, "Unauthorized.", "Current user not identified.");
+                throw new UnauthorizedException("Current user not identified.");
             }
 
             var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
@@ -28,7 +28,7 @@ namespace Library.Application.BookUseCases.Commands
             {
                 if (request.CurrentUserId != request.ClientId)
                 {
-                    throw new CustomHttpException(403, "Forbidden.", "Client can view only his own books.");
+                    throw new ConflictException("Failed to load books.","Client can view only his own books.");
                 }
             }
 

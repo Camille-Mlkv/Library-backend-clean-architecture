@@ -1,5 +1,5 @@
 ﻿using Library.Application.AuthenticationUseCases.Queries;
-using Library.Application.Utilities;
+using Library.Application.Exceptions;
 
 namespace Library.Application.AuthenticationUseCases.Commands
 {
@@ -17,7 +17,7 @@ namespace Library.Application.AuthenticationUseCases.Commands
             var user = await _unitOfWork.UserRepository.GetUserByUsername(request.Username);
             if (user is null)
             {
-                throw new CustomHttpException(404, "Not found.", $"User with {request.Username} doesn't exist.");
+                throw new NotFoundException("Error while revoking refresh token.",$"User with username {request.Username} not found.");
             }
             user.RefreshToken = null;
             await _unitOfWork.UserRepository.UpdateUserTokens(user);

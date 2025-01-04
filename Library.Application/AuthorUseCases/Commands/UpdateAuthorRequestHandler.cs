@@ -1,6 +1,5 @@
 ﻿using Library.Application.AuthorUseCases.Queries;
-using Library.Application.Utilities;
-
+using Library.Application.Exceptions;
 
 namespace Library.Application.AuthorUseCases.Commands
 {
@@ -20,7 +19,7 @@ namespace Library.Application.AuthorUseCases.Commands
             var found_author = await _unitOfWork.AuthorRepository.GetByIdAsync(request.id);
             if (found_author is null)
             {
-                throw new CustomHttpException(404, "Not found.", $"Author with id {request.id} doesn't exist.");
+                throw new NotFoundException($"Author with id {request.id} doesn't exist.");
             }
 
             var author = _mapper.Map<Author>(request.author);

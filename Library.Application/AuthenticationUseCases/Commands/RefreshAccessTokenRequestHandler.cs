@@ -1,7 +1,6 @@
 ﻿using Library.Application.AuthenticationUseCases.Queries;
 using Library.Application.DTOs.Identity;
-using Library.Application.Utilities;
-
+using Library.Application.Exceptions;
 
 namespace Library.Application.AuthenticationUseCases.Commands
 {
@@ -23,13 +22,13 @@ namespace Library.Application.AuthenticationUseCases.Commands
             var principal = _jwtTokenGenerator.GetPrincipalFromExpiredToken(request.RefreshModel.AccessToken);
             if (principal?.Identity?.Name is null)
             {
-                throw new CustomHttpException(400, "Access token not refreshed.", "Old access token is invalid.");
+                throw new BadRequestException("Access token not refreshed.", "Old access token is invalid.");
             }
 
             var user = await _unitOfWork.UserRepository.GetUserByUsername(principal.Identity.Name);
             if (user is null || user.RefreshToken != request.RefreshModel.RefreshToken || user.RefreshTokenExpiry < DateTime.UtcNow)
             {
-                throw new CustomHttpException(400, "Access token not refreshed.", "Refresh token expired or is invalid.");
+                throw new BadRequestException("Access token not refreshed.", "Refresh token expired or is invalid.");
             }
             var roles = await _unitOfWork.UserRepository.GetUserRoles(user);
             var accessToken = _jwtTokenGenerator.GenerateAccessToken(user, roles);

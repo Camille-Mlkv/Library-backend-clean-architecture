@@ -1,5 +1,5 @@
 ﻿using Library.Application.BookUseCases.Queries;
-using Library.Application.Utilities;
+using Library.Application.Exceptions;
 
 namespace Library.Application.BookUseCases.Commands
 {
@@ -23,7 +23,7 @@ namespace Library.Application.BookUseCases.Commands
             var existingBook = await _unitOfWork.BookRepository.GetByIdAsync(request.Id);
             if(existingBook is null)
             {
-                throw new CustomHttpException(404, "Not found.", $"Book with id {request.Id} doesn't exist.");
+                throw new NotFoundException($"Book with id {request.Id} doesn't exist.");
             }
 
             if(existingBook.ISBN!=updatedBook.ISBN)
@@ -31,7 +31,7 @@ namespace Library.Application.BookUseCases.Commands
                 var bookWithIsbn = await _unitOfWork.BookRepository.ListAsync(b => b.ISBN == updatedBook.ISBN);
                 if (bookWithIsbn.Any())
                 {
-                    throw new CustomHttpException(409, "Conflict.", $"Book with ISBN {updatedBook.ISBN} already exists.");
+                    throw new ConflictException("Failed to update book.", $"Book with ISBN {updatedBook.ISBN} already exists.");
                 }
             }
 
