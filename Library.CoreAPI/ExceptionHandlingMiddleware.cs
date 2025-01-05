@@ -23,120 +23,73 @@ namespace Library.Infrastructure
             }
             catch (BadRequestException ex)
             {
-                await HandleBadRequestException(context, ex);
+                await HandleException(context, ex);
             }
             catch(NotFoundException ex)
             {
-                await HandleNotFoundException(context, ex);
+                await HandleException(context, ex);
             }
             catch(UnauthorizedException ex)
             {
-                await HandleUnauthorizedException(context, ex);
+                await HandleException(context, ex);
             }
             catch(ConflictException ex)
             {
-                await HandleConflictException(context, ex);
+                await HandleException(context, ex);
             }
             catch (Exception ex)
             {
-                await HandleExceptionAsync(context, ex);
+                await HandleException(context, ex);
             }
             
         }
 
-        private Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private async Task HandleException(HttpContext context, Exception exception)
         {
-            _logger.LogError(exception, "An unhandled exception occurred.");
+            int statusCode;
+            string message,details;
 
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            switch (exception)
+            {
+                case BadRequestException badRequestException:
+                    statusCode = 400;
+                    message = badRequestException.Message;
+                    details = badRequestException.Details;
+                    break;
+                case NotFoundException notFoundException:
+                    statusCode = 404;
+                    message = notFoundException.Message;
+                    details = notFoundException.Details; 
+                    break;
+                case UnauthorizedException unauthorizedAccessException:
+                    statusCode = 401;
+                    message = unauthorizedAccessException.Message;
+                    details = unauthorizedAccessException.Details;
+                    break;
+                case ConflictException conflictException:
+                    statusCode = 409;
+                    message = conflictException.Message;
+                    details = conflictException.Details;
+                    break;
+                default:
+                    statusCode = 500;
+                    message = "An unexpected error occurred.";
+                    details = exception.Message;
+                    break;
+            }
+
+            context.Response.StatusCode = statusCode;
             context.Response.ContentType = "application/json";
 
             var response = new
             {
-                StatusCode = context.Response.StatusCode,
-                Message = "An unexpected error occurred. Please try again later.",
-                Details = exception.Message
+                StatusCode = statusCode,
+                Message = message,
+                Details = details
             };
 
             var jsonResponse = JsonSerializer.Serialize(response);
-
-            return context.Response.WriteAsync(jsonResponse);
-        }
-
-        private Task HandleBadRequestException(HttpContext context, BadRequestException exception)
-        {
-            _logger.LogWarning(exception, "A handled exception occurred.");
-
-            context.Response.StatusCode = 400;
-            context.Response.ContentType = "application/json";
-
-            var response = new
-            {
-                StatusCode = 400,
-                Message = exception.Message,
-                Details = exception.Details
-            };
-
-            var jsonResponse = JsonSerializer.Serialize(response);
-
-            return context.Response.WriteAsync(jsonResponse);
-        }
-
-        private Task HandleNotFoundException(HttpContext context, NotFoundException exception)
-        {
-            _logger.LogWarning(exception, "A handled exception occurred.");
-
-            context.Response.StatusCode = 404;
-            context.Response.ContentType = "application/json";
-
-            var response = new
-            {
-                StatusCode = 404,
-                Message = exception.Message,
-                Details = exception.Details
-            };
-
-            var jsonResponse = JsonSerializer.Serialize(response);
-
-            return context.Response.WriteAsync(jsonResponse);
-        }
-
-        private Task HandleUnauthorizedException(HttpContext context, UnauthorizedException exception)
-        {
-            _logger.LogWarning(exception, "A handled exception occurred.");
-
-            context.Response.StatusCode = 401;
-            context.Response.ContentType = "application/json";
-
-            var response = new
-            {
-                StatusCode = 401,
-                Message = exception.Message,
-                Details = exception.Details
-            };
-
-            var jsonResponse = JsonSerializer.Serialize(response);
-
-            return context.Response.WriteAsync(jsonResponse);
-        }
-
-        private Task HandleConflictException(HttpContext context, ConflictException exception)
-        {
-            _logger.LogWarning(exception, "A handled exception occurred.");
-
-            context.Response.StatusCode = 409;
-            context.Response.ContentType = "application/json";
-
-            var response = new
-            {
-                StatusCode = 409,
-                Message = exception.Message,
-                Details = exception.Details
-            };
-
-            var jsonResponse = JsonSerializer.Serialize(response);
-
-            return context.Response.WriteAsync(jsonResponse);
+            await context.Response.WriteAsync(jsonResponse);
         }
     }
 }
