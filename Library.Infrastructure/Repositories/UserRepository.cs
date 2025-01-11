@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
-using Library.Infrastructure.Data;
 using Library.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.Data;
 
 namespace Library.Infrastructure.Repositories
 {

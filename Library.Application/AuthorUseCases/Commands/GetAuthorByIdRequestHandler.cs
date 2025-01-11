@@ -17,7 +17,7 @@ namespace Library.Application.AuthorUseCases.Commands
         public async Task<ResponseData<AuthorDTO>> Handle(GetAuthorByIdRequest request, CancellationToken cancellationToken)
         {
             var responseData=new ResponseData<AuthorDTO>();
-            var found_author=await _unitOfWork.AuthorRepository.GetByIdAsync(request.id);
+            var found_author=await _unitOfWork.AuthorRepository.GetByIdAsync(request.id, cancellationToken);
             if (found_author is null)
             {
                 throw new NotFoundException($"Author with id {request.id} doesn't exist.");

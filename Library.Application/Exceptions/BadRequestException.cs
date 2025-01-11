@@ -1,11 +1,7 @@
 ﻿namespace Library.Application.Exceptions
 {
-    public class BadRequestException:Exception
+    public class BadRequestException : CustomException
     {
-        public string? Details { get; }
-        public BadRequestException(string message, string? details = null) : base(message)
-        {
-            Details = details;
-        }
+        public BadRequestException(string message, string? details = null) : base(message, details) { }
     }
 }

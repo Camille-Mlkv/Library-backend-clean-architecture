@@ -1,11 +1,7 @@
 ﻿namespace Library.Application.Exceptions
 {
-    public class UnauthorizedException:Exception
+    public class UnauthorizedException : CustomException
     {
-        public string? Details { get; }
-        public UnauthorizedException(string message, string? details = null) : base(message)
-        {
-            Details = details;
-        }
+        public UnauthorizedException(string message, string? details = null) : base(message, details) { }
     }
 }

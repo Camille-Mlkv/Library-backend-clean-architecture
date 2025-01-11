@@ -1,5 +1,4 @@
 ﻿using Library.Application.Exceptions;
-using System.Net;
 using System.Text.Json;
 
 namespace Library.Infrastructure
@@ -46,37 +45,16 @@ namespace Library.Infrastructure
 
         private async Task HandleException(HttpContext context, Exception exception)
         {
-            int statusCode;
-            string message,details;
-
-            switch (exception)
+            string message=exception.Message;
+            string? details = (exception as CustomException)?.Details;
+            int statusCode = exception switch
             {
-                case BadRequestException badRequestException:
-                    statusCode = 400;
-                    message = badRequestException.Message;
-                    details = badRequestException.Details;
-                    break;
-                case NotFoundException notFoundException:
-                    statusCode = 404;
-                    message = notFoundException.Message;
-                    details = notFoundException.Details; 
-                    break;
-                case UnauthorizedException unauthorizedAccessException:
-                    statusCode = 401;
-                    message = unauthorizedAccessException.Message;
-                    details = unauthorizedAccessException.Details;
-                    break;
-                case ConflictException conflictException:
-                    statusCode = 409;
-                    message = conflictException.Message;
-                    details = conflictException.Details;
-                    break;
-                default:
-                    statusCode = 500;
-                    message = "An unexpected error occurred.";
-                    details = exception.Message;
-                    break;
-            }
+                BadRequestException => 400,
+                NotFoundException => 404,
+                UnauthorizedException => 401,
+                ConflictException => 409,
+                _ => 500
+            };
 
             context.Response.StatusCode = statusCode;
             context.Response.ContentType = "application/json";

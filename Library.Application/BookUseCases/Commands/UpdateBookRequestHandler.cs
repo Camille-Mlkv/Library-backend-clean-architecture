@@ -20,7 +20,7 @@ namespace Library.Application.BookUseCases.Commands
         {
             var responseData = new ResponseData<object>();
             var updatedBook=request.UpdatedBook;
-            var existingBook = await _unitOfWork.BookRepository.GetByIdAsync(request.Id);
+            var existingBook = await _unitOfWork.BookRepository.GetByIdAsync(request.Id, cancellationToken);
             if(existingBook is null)
             {
                 throw new NotFoundException($"Book with id {request.Id} doesn't exist.");
@@ -28,7 +28,7 @@ namespace Library.Application.BookUseCases.Commands
 
             if(existingBook.ISBN!=updatedBook.ISBN)
             {
-                var bookWithIsbn = await _unitOfWork.BookRepository.ListAsync(b => b.ISBN == updatedBook.ISBN);
+                var bookWithIsbn = await _unitOfWork.BookRepository.ListAsync(b => b.ISBN == updatedBook.ISBN, cancellationToken);
                 if (bookWithIsbn.Any())
                 {
                     throw new ConflictException("Failed to update book.", $"Book with ISBN {updatedBook.ISBN} already exists.");

@@ -16,7 +16,7 @@ namespace Library.Application.BookUseCases.Commands
 
         public async Task<byte[]> Handle(GetBookImageRequest request, CancellationToken cancellationToken)
         {
-            var book=await _unitOfWork.BookRepository.GetByIdAsync(request.BookId);
+            var book=await _unitOfWork.BookRepository.GetByIdAsync(request.BookId, cancellationToken);
             if(book is null)
             {
                 throw new NotFoundException( $"Book with id {request.BookId} doesn't exist.");

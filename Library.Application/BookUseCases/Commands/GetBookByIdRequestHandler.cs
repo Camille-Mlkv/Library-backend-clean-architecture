@@ -17,7 +17,7 @@ namespace Library.Application.BookUseCases.Commands
         {
             var responseData = new ResponseData<BookDTO>();
 
-            var found_book = await _unitOfWork.BookRepository.GetByIdAsync(request.id);
+            var found_book = await _unitOfWork.BookRepository.GetByIdAsync(request.id, cancellationToken);
             if (found_book is null)
             {
                 throw new NotFoundException($"Book with id {request.id} doesn't exist.");

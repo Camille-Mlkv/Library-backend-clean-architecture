@@ -1,11 +1,7 @@
 ﻿namespace Library.Application.Exceptions
 {
-    public class NotFoundException:Exception
+    public class NotFoundException : CustomException
     {
-        public string? Details { get; }
-        public NotFoundException(string message, string? details = null) : base(message)
-        {
-            Details = details;
-        }
+        public NotFoundException(string message, string? details = null) : base(message, details) { }
     }
 }

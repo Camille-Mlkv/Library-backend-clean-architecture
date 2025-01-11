@@ -38,13 +38,13 @@ namespace Library.Application.BookUseCases.Commands
             request.book.ImagePath=await _fileService.SaveFileAsync(bytes, filename);
 
             var book = _mapper.Map<Book>(request.book);
-            var bookWithIsbn=await _unitOfWork.BookRepository.ListAsync(b=>b.ISBN==request.book.ISBN);
+            var bookWithIsbn=await _unitOfWork.BookRepository.ListAsync(b=>b.ISBN==request.book.ISBN, cancellationToken);
             if(bookWithIsbn.Any())
             {
                 throw new ConflictException("Resource already exists.", $"Book with ISBN {request.book.ISBN} already exists.");
             }
 
-            await _unitOfWork.BookRepository.AddAsync(book);
+            await _unitOfWork.BookRepository.AddAsync(book, cancellationToken);
             await _unitOfWork.SaveAllAsync();
 
             var createdBook = _mapper.Map<BookDTO>(book);

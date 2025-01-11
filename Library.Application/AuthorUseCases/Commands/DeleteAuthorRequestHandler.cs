@@ -17,19 +17,19 @@ namespace Library.Application.AuthorUseCases.Commands
         public async Task<ResponseData<object>> Handle(DeleteAuthorRequest request, CancellationToken cancellationToken)
         {
             var response=new ResponseData<object>();
-            var author=await _unitOfWork.AuthorRepository.GetByIdAsync(request.id);
+            var author=await _unitOfWork.AuthorRepository.GetByIdAsync(request.id,cancellationToken);
             if (author is null)
             {
                 throw new NotFoundException($"Author with id {request.id} dosen't exist.");
             }
 
-            var books = await _unitOfWork.BookRepository.ListAsync(b => b.AuthorId == request.id);
+            var books = await _unitOfWork.BookRepository.ListAsync(b => b.AuthorId == request.id,cancellationToken);
             if (books.Any())
             {
                 throw new ConflictException("Delete operation failed.", $"Author with id {request.id} can't be deleted as it has associated books.");
             }
 
-            await _unitOfWork.AuthorRepository.DeleteAsync(author);
+            await _unitOfWork.AuthorRepository.DeleteAsync(author, cancellationToken);
             await _unitOfWork.SaveAllAsync();
 
             response.IsSuccess = true;

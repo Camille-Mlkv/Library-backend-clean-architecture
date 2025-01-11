@@ -17,7 +17,7 @@ namespace Library.Application.BookUseCases.Commands
         public async Task<ResponseData<object>> Handle(AssignBookToClientRequest request, CancellationToken cancellationToken)
         {
             var responseData = new ResponseData<object>();
-            var found_book = await _unitOfWork.BookRepository.GetByIdAsync(request.BookId);
+            var found_book = await _unitOfWork.BookRepository.GetByIdAsync(request.BookId, cancellationToken);
             if(found_book is null)
             {
                 throw new NotFoundException($"Book with id {request.BookId} doesn't exist.");

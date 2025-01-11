@@ -19,7 +19,7 @@ namespace Library.Application.BookUseCases.Commands
         public async Task<ResponseData<object>> Handle(DeleteBookRequest request, CancellationToken cancellationToken)
         {
             var response = new ResponseData<object>();
-            var book =await _unitOfWork.BookRepository.GetByIdAsync(request.Id);
+            var book =await _unitOfWork.BookRepository.GetByIdAsync(request.Id, cancellationToken);
             if(book is null)
             {
                 throw new NotFoundException("Delete operation failed.",$"Book with id {request.Id} doesn't exist.");
@@ -30,7 +30,7 @@ namespace Library.Application.BookUseCases.Commands
                 _fileService.DeleteFileAsync(book.ImagePath);
             }
 
-            await _unitOfWork.BookRepository.DeleteAsync(book);
+            await _unitOfWork.BookRepository.DeleteAsync(book, cancellationToken);
             await _unitOfWork.SaveAllAsync();
 
             response.IsSuccess = true;
