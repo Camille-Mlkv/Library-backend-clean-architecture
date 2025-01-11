@@ -21,7 +21,7 @@ namespace Library.Application.AuthenticationUseCases.Commands
             }
             user.RefreshToken = null;
             await _unitOfWork.UserRepository.UpdateUserTokens(user);
-            await _unitOfWork.SaveAllAsync();
+            await _unitOfWork.SaveAllAsync(cancellationToken);
 
             response.IsSuccess = true;
             response.Message = "Refresh token revoked";

@@ -24,8 +24,8 @@ namespace Library.Application.AuthorUseCases.Commands
 
             var author = _mapper.Map<Author>(request.author);
             author.Id = request.id;
-            await _unitOfWork.AuthorRepository.UpdateAsync(author,cancellationToken);
-            await _unitOfWork.SaveAllAsync();
+            await _unitOfWork.AuthorRepository.Update(author);
+            await _unitOfWork.SaveAllAsync(cancellationToken);
 
             responseData.IsSuccess = true;
             responseData.Message = "Author updated successfully.";

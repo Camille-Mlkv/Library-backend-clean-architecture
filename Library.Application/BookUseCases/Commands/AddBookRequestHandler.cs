@@ -45,7 +45,7 @@ namespace Library.Application.BookUseCases.Commands
             }
 
             await _unitOfWork.BookRepository.AddAsync(book, cancellationToken);
-            await _unitOfWork.SaveAllAsync();
+            await _unitOfWork.SaveAllAsync(cancellationToken);
 
             var createdBook = _mapper.Map<BookDTO>(book);
             responseData.Result = createdBook;

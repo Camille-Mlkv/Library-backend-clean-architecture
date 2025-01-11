@@ -19,6 +19,6 @@ namespace Library.Infrastructure.Repositories
         public IRepository<Book> BookRepository => _bookRepository;
         public IRepository<Author> AuthorRepository => _authorRepository;
         public IUserRepository UserRepository => _userRepository;
-        public async Task SaveAllAsync() => await _context.SaveChangesAsync();
+        public async Task SaveAllAsync(CancellationToken cancellationToken = default) => await _context.SaveChangesAsync(cancellationToken);
     }
 }

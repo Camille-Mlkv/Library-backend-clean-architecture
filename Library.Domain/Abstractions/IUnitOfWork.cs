@@ -7,6 +7,6 @@ namespace Library.Domain.Abstractions
         IRepository<Book> BookRepository { get; }
         IRepository<Author> AuthorRepository { get; }
         IUserRepository UserRepository { get; }
-        public Task SaveAllAsync();
+        public Task SaveAllAsync(CancellationToken cancellationToken = default);
     }
 }

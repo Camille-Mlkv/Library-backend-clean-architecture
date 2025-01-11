@@ -47,13 +47,13 @@ namespace Library.Infrastructure.Repositories
             await _context.Set<T>().AddAsync(entity, cancellationToken);
         }
 
-        public Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
+        public Task Update(T entity)
         {
             _context.Set<T>().Update(entity);
             return Task.CompletedTask;
         }
 
-        public Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
+        public Task Delete(T entity)
         {
             _context.Set<T>().Remove(entity);
             return Task.CompletedTask;

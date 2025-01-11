@@ -17,7 +17,7 @@ namespace Library.Application.AuthorUseCases.Commands
             var responseData = new ResponseData<AuthorDTO>();
             var author = _mapper.Map<Author>(request.authorDto);
             await _unitOfWork.AuthorRepository.AddAsync(author, cancellationToken);
-            await _unitOfWork.SaveAllAsync();
+            await _unitOfWork.SaveAllAsync(cancellationToken);
 
             var authorDto=_mapper.Map<AuthorDTO>(author);
 

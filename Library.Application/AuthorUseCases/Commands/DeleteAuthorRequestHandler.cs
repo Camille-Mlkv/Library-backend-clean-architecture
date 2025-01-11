@@ -29,8 +29,8 @@ namespace Library.Application.AuthorUseCases.Commands
                 throw new ConflictException("Delete operation failed.", $"Author with id {request.id} can't be deleted as it has associated books.");
             }
 
-            await _unitOfWork.AuthorRepository.DeleteAsync(author, cancellationToken);
-            await _unitOfWork.SaveAllAsync();
+            await _unitOfWork.AuthorRepository.Delete(author);
+            await _unitOfWork.SaveAllAsync(cancellationToken);
 
             response.IsSuccess = true;
             response.Message = "Author deleted successfully.";

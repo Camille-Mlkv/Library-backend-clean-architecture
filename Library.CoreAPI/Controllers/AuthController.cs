@@ -16,30 +16,30 @@ namespace Library.CoreAPI.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegistrationRequestDTO model)
+        public async Task<IActionResult> Register([FromBody] RegistrationRequestDTO model, CancellationToken cancellationToken = default)
         {
-            var response = await _mediator.Send(new UserRegistrationRequest(model));
+            var response = await _mediator.Send(new UserRegistrationRequest(model),cancellationToken);
             return Ok(response);
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDTO model, CancellationToken cancellationToken = default)
         {
-            var response = await _mediator.Send(new UserLogInRequest(model));
+            var response = await _mediator.Send(new UserLogInRequest(model),cancellationToken);
             return Ok(response);
         }
 
         [HttpPost("refresh")]
-        public async Task<IActionResult> RefreshAccessToken([FromBody] RefreshModelDTO model)
+        public async Task<IActionResult> RefreshAccessToken([FromBody] RefreshModelDTO model, CancellationToken cancellationToken = default)
         {
-            var response = await _mediator.Send(new RefreshAccessTokenRequest(model));
+            var response = await _mediator.Send(new RefreshAccessTokenRequest(model),cancellationToken);
             return Ok(response);
         }
 
         [HttpDelete("revoke")]
-        public async Task<IActionResult> RevokeRefreshToken(string username)
+        public async Task<IActionResult> RevokeRefreshToken(string username, CancellationToken cancellationToken = default)
         {
-            var response = await _mediator.Send(new RevokeRefreshTokenRequest(username));
+            var response = await _mediator.Send(new RevokeRefreshTokenRequest(username),cancellationToken);
             return StatusCode(204,response.Message);
         }
     }

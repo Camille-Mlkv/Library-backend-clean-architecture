@@ -30,8 +30,8 @@ namespace Library.Application.BookUseCases.Commands
                 _fileService.DeleteFileAsync(book.ImagePath);
             }
 
-            await _unitOfWork.BookRepository.DeleteAsync(book, cancellationToken);
-            await _unitOfWork.SaveAllAsync();
+            await _unitOfWork.BookRepository.Delete(book);
+            await _unitOfWork.SaveAllAsync(cancellationToken);
 
             response.IsSuccess = true;
             response.Message = "Book deleted successfully.";

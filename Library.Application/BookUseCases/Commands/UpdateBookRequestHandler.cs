@@ -57,8 +57,8 @@ namespace Library.Application.BookUseCases.Commands
             var book = _mapper.Map<Book>(updatedBook);
             book.Id = request.Id;
 
-            await _unitOfWork.BookRepository.UpdateAsync(book, cancellationToken);
-            await _unitOfWork.SaveAllAsync();
+            await _unitOfWork.BookRepository.Update(book);
+            await _unitOfWork.SaveAllAsync(cancellationToken);
 
             responseData.IsSuccess = true;
             responseData.Message = "Book updated successfully.";

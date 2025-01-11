@@ -36,7 +36,7 @@ namespace Library.Domain.Abstractions
         /// <param name="entity">Сущность с измененным содержимым</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task UpdateAsync(T entity, CancellationToken cancellationToken = default);
+        Task Update(T entity);
 
         /// <summary>
         /// Удаление сущности.
@@ -44,7 +44,7 @@ namespace Library.Domain.Abstractions
         /// <param name="entity">Сущность, которую следует удалить</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task DeleteAsync(T entity, CancellationToken cancellationToken = default);
+        Task Delete(T entity);
 
         /// <summary>
         /// Поиск сущности по Id.

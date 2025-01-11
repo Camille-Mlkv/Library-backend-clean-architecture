@@ -39,7 +39,7 @@ namespace Library.Application.BookUseCases.Commands
             found_book.ReturnBy= DateTime.UtcNow.AddDays(14);
 
             await _unitOfWork.BookRepository.UpdateAsync(found_book, cancellationToken);
-            await _unitOfWork.SaveAllAsync();
+            await _unitOfWork.SaveAllAsync(cancellationToken);
 
             responseData.IsSuccess = true;
             responseData.Message = $"Book assigned to client {request.ClientId}.";

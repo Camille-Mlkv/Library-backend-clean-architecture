@@ -35,7 +35,7 @@ namespace Library.Application.AuthenticationUseCases.Commands
             user.RefreshTokenExpiry = DateTime.UtcNow.AddHours(24);
 
             await _unitOfWork.UserRepository.UpdateUserTokens(user);
-            await _unitOfWork.SaveAllAsync();
+            await _unitOfWork.SaveAllAsync(cancellationToken);
 
             LoginResponseDTO loginResponseDTO = new()
             {
