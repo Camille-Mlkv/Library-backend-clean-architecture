@@ -34,7 +34,6 @@ namespace Library.Domain.Abstractions
         /// Изменение сущности.
         /// </summary>
         /// <param name="entity">Сущность с измененным содержимым</param>
-        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task Update(T entity);
 
@@ -42,7 +41,6 @@ namespace Library.Domain.Abstractions
         /// Удаление сущности.
         /// </summary>
         /// <param name="entity">Сущность, которую следует удалить</param>
-        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task Delete(T entity);
 
@@ -63,6 +61,7 @@ namespace Library.Domain.Abstractions
         /// <param name="pageNumber">Номер страницы (начинается с 1)</param>
         /// <param name="pageSize">Количество элементов на странице</param>
         /// <param name="cancellationToken"></param>
+        /// <param name="filter"></param>
         /// <returns>Отфильтрованный список сущностей с учетом пагинации</returns>
         Task<List<T>> GetPagedListAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default, Expression<Func<T, bool>>? filter = null);
 

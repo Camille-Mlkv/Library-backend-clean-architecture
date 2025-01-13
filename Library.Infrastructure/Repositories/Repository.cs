@@ -7,22 +7,19 @@ namespace Library.Infrastructure.Repositories
     public class Repository<T> : IRepository<T> where T : BaseEntity
     {
         protected readonly AppDbContext _context;
-        protected readonly DbSet<T> _entities;
         public Repository(AppDbContext context)
         {
             _context = context;
-            _entities = context.Set<T>();
-
         }
 
         public async Task<IReadOnlyList<T>> ListAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _entities.ToListAsync(cancellationToken);
+            return await _context.Set<T>().ToListAsync(cancellationToken);
         }
 
         public async Task<IReadOnlyList<T>> ListAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[]? includesProperties)
         {
-            IQueryable<T>? query = _entities.AsQueryable();
+            IQueryable<T>? query = _context.Set<T>().AsQueryable();
             if (includesProperties != null)
             {
                 if (includesProperties.Any())
@@ -61,8 +58,7 @@ namespace Library.Infrastructure.Repositories
 
         public async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[]? includesProperties)
         {
-
-            IQueryable<T> query = _entities.AsQueryable();
+            IQueryable<T> query = _context.Set<T>().AsQueryable();
             query = query.AsNoTracking();
 
             query = query.Where(entity => entity.Id == id);
